@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exámenes Virtuales | Técnico Profesional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d1a;
+      --card: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.1);
+      --text: #f0f0ff;
+      --muted: rgba(255,255,255,0.45);
+      --purple: #7C3AED;
+      --purple-l: #a78bfa;
+      --pink: #ec4899;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at top left, rgba(124,58,237,.15) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(236,72,153,.15) 0%, transparent 50%);
+    }
+
+    /* ── SCREENS ── */
+    .screen { display: none; min-height: 100vh; }
+    .screen.active {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem 1rem;
+      animation: fadeUp .35s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── COMMON ── */
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .subtitle { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+    .logo { color: var(--muted); font-size: .85rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2rem; }
+    .back-btn {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-family: 'Poppins', sans-serif; font-size: .9rem;
+      display: flex; align-items: center; gap: .4rem;
+      margin-bottom: 1.5rem; transition: color .2s;
+    }
+    .back-btn:hover { color: var(--text); }
+
+    /* ── SCREEN 1: COURSES ── */
+    .courses-wrap { width: 100%; max-width: 680px; text-align: center; }
+    .courses-wrap h1 { margin-bottom: .4rem; }
+    .courses-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.2rem; margin-top: 2rem;
+    }
+    .course-card {
+      position: relative; overflow: hidden;
+      background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+      padding: 2.2rem 1.8rem; cursor: pointer;
+      transition: transform .25s, border-color .25s;
+      text-align: center;
+    }
+    .course-card::after {
+      content: ''; position: absolute; inset: 0; opacity: 0;
+      transition: opacity .3s; border-radius: 20px;
+    }
+    .course-card.db::after   { background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(59,130,246,.2)); }
+    .course-card.web2::after { background: linear-gradient(135deg, rgba(236,72,153,.25), rgba(245,158,11,.2)); }
+    .course-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,.25); }
+    .course-card:hover::after { opacity: 1; }
+    .course-card .icon { font-size: 3.2rem; display: block; margin-bottom: .9rem; position: relative; z-index: 1; }
+    .course-card h2 { font-size: 1.2rem; font-weight: 700; position: relative; z-index: 1; }
+    .course-card p { color: var(--muted); font-size: .85rem; margin-top: .4rem; position: relative; z-index: 1; }
+    .badge {
+      display: inline-block; margin-top: .9rem; padding: .25rem .9rem;
+      border-radius: 100px; font-size: .78rem; font-weight: 600;
+      position: relative; z-index: 1;
+    }
+    .course-card.db   .badge { background: rgba(124,58,237,.3); color: var(--purple-l); }
+    .course-card.web2 .badge { background: rgba(236,72,153,.3); color: #f9a8d4; }
+
+    /* ── SCREEN 2: STUDENTS ── */
+    .students-wrap { width: 100%; max-width: 460px; }
+    .search-box { position: relative; margin-bottom: .9rem; }
+    .search-box span { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); }
+    .search-box input {
+      width: 100%; padding: .85rem 1rem .85rem 2.8rem;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      color: var(--text); font-family: 'Poppins', sans-serif; font-size: .95rem;
+      outline: none; transition: border-color .2s;
+    }
+    .search-box input:focus { border-color: var(--purple-l); }
+    .search-box input::placeholder { color: var(--muted); }
+    .students-list {
+      max-height: 320px; overflow-y: auto;
+      border: 1px solid var(--border); border-radius: 14px;
+    }
+    .students-list::-webkit-scrollbar { width: 5px; }
+    .students-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .student-item {
+      display: flex; align-items: center; gap: .8rem;
+      padding: .85rem 1.1rem; cursor: pointer; font-size: .93rem;
+      border-bottom: 1px solid var(--border); transition: background .15s;
+    }
+    .student-item:last-child { border-bottom: none; }
+    .student-item:hover { background: rgba(124,58,237,.18); }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .82rem; flex-shrink: 0;
+    }
+
+    /* ── SCREEN 3: COUNTDOWN ── */
+    .cd-num {
+      font-size: clamp(5rem, 18vw, 9rem); font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, #a78bfa, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .cd-anim { animation: cdPulse 1s ease-in-out forwards; }
+    @keyframes cdPulse {
+      0%   { transform: scale(1.4); opacity: 0; }
+      50%  { transform: scale(1);   opacity: 1; }
+      100% { transform: scale(.85); opacity: 0; }
+    }
+
+    /* ── SCREEN 4: EXAM ── */
+    .exam-wrap { width: 100%; max-width: 660px; }
+    .exam-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .q-badge {
+      background: var(--card); border: 1px solid var(--border);
+      padding: .35rem .9rem; border-radius: 100px; font-size: .82rem; color: var(--muted);
+    }
+    .streak-pill {
+      display: flex; align-items: center; gap: .3rem;
+      font-size: .9rem; font-weight: 600; color: var(--yellow);
+    }
+    .pts { display: flex; align-items: center; gap: .4rem; font-weight: 700; font-size: 1.05rem; color: var(--yellow); }
+    .prog-track { background: var(--card); border-radius: 100px; height: 7px; overflow: hidden; margin-bottom: 1.2rem; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--pink)); border-radius: 100px; transition: width .4s ease; }
+
+    /* timer */
+    .timer-wrap { display: flex; justify-content: center; margin-bottom: 1.2rem; position: relative; }
+    .timer-svg { transform: rotate(-90deg); }
+    .t-track { fill: none; stroke: var(--border); stroke-width: 5; }
+    .t-ring  { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke .3s; }
+    .t-label {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 1.3rem; font-weight: 700;
+    }
+
+    /* question card */
+    .q-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+      padding: 1.6rem; margin-bottom: 1.2rem;
+    }
+    .q-cat { font-size: .75rem; color: var(--purple-l); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: .6rem; }
+    .q-text { font-size: 1.05rem; font-weight: 600; line-height: 1.65; }
+
+    /* options */
+    .opts { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; margin-bottom: .9rem; }
+    @media (max-width: 480px) { .opts { grid-template-columns: 1fr; } }
+    .opt {
+      background: var(--card); border: 2px solid var(--border); border-radius: 13px;
+      padding: .9rem 1.1rem; color: var(--text); font-family: 'Poppins', sans-serif;
+      font-size: .88rem; cursor: pointer; text-align: left; line-height: 1.45;
+      transition: transform .15s, background .15s, border-color .15s;
+    }
+    .opt:hover:not(:disabled) { background: rgba(124,58,237,.2); border-color: var(--purple-l); transform: translateY(-2px); }
+    .opt:disabled { cursor: not-allowed; }
+    .opt.correct { background: rgba(16,185,129,.2) !important; border-color: var(--green) !important; color: #6ee7b7; }
+    .opt.wrong   { background: rgba(239,68,68,.2)  !important; border-color: var(--red)   !important; color: #fca5a5; }
+    .opt.reveal  { background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.4); }
+    .opt-letter  { font-weight: 700; opacity: .55; margin-right: .4rem; }
+
+    /* feedback */
+    .feedback {
+      border-radius: 13px; padding: .9rem 1.3rem;
+      margin-bottom: .9rem; display: none;
+      animation: fadeUp .25s ease;
+    }
+    .feedback.ok  { background: rgba(16,185,129,.14); border: 1px solid rgba(16,185,129,.35); }
+    .feedback.bad { background: rgba(239,68,68,.14);  border: 1px solid rgba(239,68,68,.35);  }
+    .fb-title { font-weight: 700; margin-bottom: .25rem; }
+    .fb-title.ok  { color: var(--green); }
+    .fb-title.bad { color: var(--red); }
+    .fb-body { font-size: .85rem; color: var(--muted); line-height: 1.5; }
+
+    /* next btn */
+    .next-btn {
+      width: 100%; padding: .95rem;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border: none; border-radius: 13px; color: #fff;
+      font-family: 'Poppins', sans-serif; font-size: .97rem; font-weight: 700;
+      cursor: pointer; display: none; transition: opacity .2s, transform .2s;
+    }
+    .next-btn:hover { opacity: .88; transform: translateY(-2px); }
+
+    /* ── SCREEN 5: RESULTS ── */
+    .results-wrap { width: 100%; max-width: 500px; text-align: center; }
+    .stars { font-size: 3rem; margin: 1.3rem 0; animation: scaleIn .5s ease .4s both; }
+    @keyframes scaleIn { from { transform: scale(0); } 70% { transform: scale(1.2); } to { transform: scale(1); } }
+    .score-circle {
+      width: 130px; height: 130px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem; animation: scaleIn .45s ease;
+    }
+    .score-val { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+    .score-lbl { font-size: .78rem; opacity: .8; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 13px; padding: .9rem; }
+    .stat-val { font-size: 1.7rem; font-weight: 800; }
+    .stat-lbl { font-size: .8rem; color: var(--muted); }
+    .submit-btn {
+      width: 100%; padding: .95rem; margin-bottom: .7rem;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      border: none; border-radius: 13px; color: #fff;
+      font-family: 'Poppins', sans-serif; font-size: .97rem; font-weight: 700;
+      cursor: pointer; transition: opacity .2s, transform .2s;
+    }
+    .submit-btn:hover:not(:disabled) { opacity: .88; transform: translateY(-2px); }
+    .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .submit-status { font-size: .88rem; color: var(--muted); min-height: 1.4rem; }
+    .submit-status.ok  { color: var(--green); }
+    .submit-status.err { color: var(--red); }
+    .dl-btn {
+      width: 100%; padding: .8rem; margin-bottom: .7rem;
+      background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.35); border-radius: 13px;
+      color: #6ee7b7; font-family: 'Poppins', sans-serif; font-size: .9rem; font-weight: 600;
+      cursor: pointer; transition: background .2s;
+    }
+    .dl-btn:hover { background: rgba(16,185,129,.22); }
+    .restart-btn {
+      width: 100%; padding: .8rem; margin-top: .6rem;
+      background: var(--card); border: 1px solid var(--border); border-radius: 13px;
+      color: var(--muted); font-family: 'Poppins', sans-serif; font-size: .9rem;
+      cursor: pointer; transition: color .2s;
+    }
+    .restart-btn:hover { color: var(--text); }
+
+    /* ── LOADER / ERROR ── */
+    .loader { display: flex; flex-direction: column; align-items: center; gap: .9rem; color: var(--muted); }
+    .spinner {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--purple-l);
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-box {
+      background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
+      border-radius: 14px; padding: 1.5rem; text-align: center; max-width: 380px;
+    }
+    .error-box .eicon { font-size: 2.2rem; margin-bottom: .6rem; }
+    .error-box p { color: var(--muted); font-size: .88rem; margin: .5rem 0 1rem; }
+    .retry-btn {
+      background: rgba(239,68,68,.2); border: 1px solid rgba(239,68,68,.4);
+      color: #fca5a5; padding: .5rem 1.3rem; border-radius: 9px;
+      cursor: pointer; font-family: 'Poppins', sans-serif; font-size: .88rem;
+      transition: background .2s;
+    }
+    .retry-btn:hover { background: rgba(239,68,68,.3); }
+
+    /* ── EXAM PROTECTION ── */
+    .exam-protected, .exam-protected * { user-select: none; -webkit-user-select: none; }
+
+    /* ── CONFETTI ── */
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
+    .cfto {
+      position: absolute;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      to   { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ SCREEN 1: COURSE SELECTION ═══════════════════════════ -->
+<div class="screen active" id="s-courses">
+  <div class="courses-wrap">
+    <div class="logo">🎓 Unicor · Técnico Profesional</div>
+    <h1>Exámenes Virtuales</h1>
+    <p class="subtitle">Selecciona el curso al que perteneces</p>
+    <div class="courses-grid">
+      <div class="course-card db" onclick="selectCourse('db')">
+        <span class="icon">🗄️</span>
+        <h2>Base de Datos</h2>
+        <p>Modelo Entidad-Relación, DDL y DML</p>
+        <span class="badge">10 preguntas</span>
+      </div>
+      <div class="course-card web2" onclick="selectCourse('web2')">
+        <span class="icon">🚀</span>
+        <h2>Programación Web II</h2>
+        <p>Node.js, npm y Express</p>
+        <span class="badge">10 preguntas</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SCREEN 2: GROUP SELECTION ═══════════════════════════ -->
+<div class="screen" id="s-groups">
+  <div class="courses-wrap">
+    <button class="back-btn" onclick="show('s-courses')" style="justify-content:center;margin-bottom:1.5rem">← Volver</button>
+    <h1 id="grp-title">Base de Datos</h1>
+    <p class="subtitle">Selecciona tu grupo</p>
+    <div class="courses-grid" id="grp-grid" style="margin-top:2rem"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SCREEN 3: STUDENT SELECTION ═══════════════════════════ -->
+<div class="screen" id="s-students">
+  <div class="students-wrap">
+    <button class="back-btn" onclick="show('s-groups')">← Volver</button>
+    <h1 id="st-title">Selecciona tu nombre</h1>
+    <p class="subtitle" style="margin-bottom:1.5rem" id="st-sub">¿Quién eres?</p>
+
+    <div id="st-loading" class="loader">
+      <div class="spinner"></div>
+      <span>Cargando estudiantes...</span>
+    </div>
+    <div id="st-error" style="display:none">
+      <div class="error-box">
+        <div class="eicon">⚠️</div>
+        <strong>No se pudo cargar la lista</strong>
+        <p id="st-err-msg">Verifica tu conexión e intenta de nuevo.</p>
+        <button class="retry-btn" onclick="loadStudents()">Reintentar</button>
+      </div>
+    </div>
+    <div id="st-content" style="display:none">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="st-search" placeholder="Busca tu nombre..." oninput="filterStudents()">
+      </div>
+      <div class="students-list" id="st-list"></div>
+    </div>
+
+    <div id="no-attempts-box" style="display:none">
+      <div class="error-box">
+        <div class="eicon">🚫</div>
+        <strong>Sin intentos disponibles</strong>
+        <p id="no-attempts-msg">Ya usaste los 2 intentos permitidos para este examen.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SCREEN 3: COUNTDOWN ═══════════════════════════ -->
+<div class="screen" id="s-countdown" style="text-align:center">
+  <p style="color:var(--muted);font-size:1.1rem;margin-bottom:.8rem">¡Prepárate!</p>
+  <div class="cd-num" id="cd-num">3</div>
+  <p style="color:var(--muted);margin-top:1rem" id="cd-msg">El examen comenzará en breve</p>
+</div>
+
+<!-- ═══════════════════════════ SCREEN 4: EXAM ═══════════════════════════ -->
+<div class="screen" id="s-exam">
+  <div class="exam-wrap">
+    <div class="exam-topbar">
+      <div style="display:flex;align-items:center;gap:.7rem">
+        <span class="q-badge" id="q-badge">1 / 10</span>
+        <span class="streak-pill" id="streak-pill" style="display:none">🔥 <span id="streak-n">0</span></span>
+      </div>
+      <div class="pts">⭐ <span id="pts-display">0</span></div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+
+    <div class="timer-wrap">
+      <svg class="timer-svg" width="76" height="76" viewBox="0 0 76 76">
+        <circle class="t-track" cx="38" cy="38" r="33"/>
+        <circle class="t-ring" id="t-ring" cx="38" cy="38" r="33"/>
+      </svg>
+      <span class="t-label" id="t-label">30</span>
+    </div>
+
+    <div class="q-card">
+      <div class="q-cat" id="q-cat">—</div>
+      <div class="q-text" id="q-text">…</div>
+    </div>
+
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="feedback">
+      <div class="fb-title" id="fb-title"></div>
+      <div class="fb-body"  id="fb-body"></div>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="nextQ()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SCREEN 5: RESULTS ═══════════════════════════ -->
+<div class="screen" id="s-results">
+  <div class="results-wrap">
+    <h1 id="res-title">¡Excelente!</h1>
+    <p class="subtitle" id="res-sub">Has completado el examen</p>
+    <div class="stars" id="res-stars">⭐⭐⭐</div>
+    <div class="score-circle">
+      <span class="score-val" id="res-score">0.0</span>
+      <span class="score-lbl">/ 5.0</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="res-correct" style="color:var(--green)">0</div>
+        <div class="stat-lbl">Correctas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="res-pts" style="color:var(--yellow)">0</div>
+        <div class="stat-lbl">Puntos</div>
+      </div>
+    </div>
+    <button class="submit-btn" id="submit-btn" onclick="submitGrade()">Enviar nota</button>
+    <div class="submit-status" id="submit-status"></div>
+    <div id="dl-btn" style="display:none; margin-bottom:.7rem; padding:.7rem 1rem; background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.3); border-radius:13px; font-size:.85rem; color:#6ee7b7; text-align:center;">
+      📋 Nota respaldada en Google Sheets
+    </div>
+    <button class="restart-btn" onclick="restart()">↩ Volver al inicio</button>
+  </div>
+</div>
+
+<div id="confetti"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   CONFIGURACIÓN — reemplaza los tokens que te dará e-notes
+   ════════════════════════════════════════════════════════ */
+const CFG = {
+  BASE_URL: 'http://localhost:3000',
+  SHEETS_URL: 'https://script.google.com/macros/s/AKfycbzwiF0wl4ThkRifYta7EcHwYoD2MWDrqR5W59H977mtxG9NI-WAmnitpw_YELEg95W6wA/exec',
+  courses: {
+    db: {
+      label: 'Base de Datos',
+      groups: [
+        { label: 'Grupo 1', token: '55047a87ee5bce8703264c4ab542f0d3650a25af1d5a2e24' },
+        { label: 'Grupo 2', token: '3d773673d58e0dd21881886e54166144f97d5a1eb1192d35' },
+      ],
+    },
+    web2: {
+      label: 'Programación Web II',
+      groups: [
+        { label: 'Grupo 1', token: '8735e18e6cd67ba1b95d6b1af3e7f52ca9b3e886a3bf8b56' },
+        { label: 'Grupo 2', token: '730cf70c3eb5ce90c98342acecb75edf5511059b296f874f' },
+      ],
+    },
+  },
+};
+
+/* ════════════════════════════════════════════════════════
+   PREGUNTAS
+   ════════════════════════════════════════════════════════ */
+const EXAMS = {
+  db: [
+    {
+      cat: 'Modelo ER',
+      q: '¿Qué es una entidad en el modelo Entidad-Relación?',
+      opts: [
+        'Un campo específico dentro de una tabla',
+        'Un objeto del mundo real con existencia propia que se puede diferenciar de otros',
+        'Un tipo especial de relación entre dos tablas',
+        'Un índice que mejora el rendimiento de consultas',
+      ],
+      ok: 1,
+      exp: 'Una entidad representa un objeto o concepto del mundo real (persona, lugar, cosa) con existencia independiente e identificable de forma única.',
+    },
+    {
+      cat: 'Modelo ER',
+      q: 'Un estudiante puede inscribirse en muchos cursos y un curso puede tener muchos estudiantes. ¿Qué tipo de relación es esta?',
+      opts: ['1:1 — Uno a uno', '1:N — Uno a muchos', 'N:M — Muchos a muchos', 'N:1 — Muchos a uno'],
+      ok: 2,
+      exp: 'La relación N:M (muchos a muchos) ocurre cuando múltiples registros de una entidad se relacionan con múltiples de otra. Se implementa con una tabla intermedia.',
+    },
+    {
+      cat: 'Modelo ER',
+      q: '¿Cuál es la función principal de una llave primaria (PRIMARY KEY)?',
+      opts: [
+        'Conectar dos tablas mediante una relación foránea',
+        'Permitir valores nulos en ese campo',
+        'Identificar de forma única cada registro en una tabla',
+        'Ordenar los registros automáticamente',
+      ],
+      ok: 2,
+      exp: 'La PRIMARY KEY garantiza que cada fila sea única. No admite valores NULL ni duplicados.',
+    },
+    {
+      cat: 'Modelo ER',
+      q: '¿Qué es un atributo en el modelo Entidad-Relación?',
+      opts: [
+        'Una tabla de la base de datos',
+        'Una relación entre dos entidades',
+        'Una característica o propiedad que describe a una entidad',
+        'Un procedimiento almacenado en la BD',
+      ],
+      ok: 2,
+      exp: 'Los atributos describen a las entidades. Por ejemplo, la entidad "Estudiante" tiene atributos como nombre, código y fecha de nacimiento.',
+    },
+    {
+      cat: 'DDL',
+      q: '¿Cuál de estos comandos pertenece al grupo DDL (Data Definition Language)?',
+      opts: ['SELECT', 'INSERT INTO', 'UPDATE', 'CREATE TABLE'],
+      ok: 3,
+      exp: 'DDL define la estructura de la BD: CREATE, ALTER, DROP, TRUNCATE. SELECT, INSERT y UPDATE son DML (Data Manipulation Language).',
+    },
+    {
+      cat: 'DDL',
+      q: '¿Qué hace el comando ALTER TABLE?',
+      opts: [
+        'Elimina la tabla y todos sus datos permanentemente',
+        'Modifica la estructura de una tabla existente (agrega/elimina columnas, cambia tipos)',
+        'Inserta nuevos registros en la tabla',
+        'Consulta los datos almacenados en la tabla',
+      ],
+      ok: 1,
+      exp: 'ALTER TABLE permite cambiar la estructura de una tabla existente: ADD COLUMN, DROP COLUMN, MODIFY COLUMN, entre otros.',
+    },
+    {
+      cat: 'DDL',
+      q: '¿Cuál es la diferencia clave entre DELETE y TRUNCATE?',
+      opts: [
+        'No hay diferencia, hacen exactamente lo mismo',
+        'TRUNCATE borra solo algunos registros usando la cláusula WHERE',
+        'DELETE puede filtrar con WHERE y genera log de transacciones; TRUNCATE borra todo sin log',
+        'DELETE es DDL y TRUNCATE es DML',
+      ],
+      ok: 2,
+      exp: 'DELETE (DML) admite WHERE y genera log para rollback. TRUNCATE (DDL) borra todos los registros sin log, por eso es más rápido pero irreversible.',
+    },
+    {
+      cat: 'DML',
+      q: '¿Qué hace el comando INSERT en SQL?',
+      opts: [
+        'Modifica registros ya existentes en la tabla',
+        'Elimina registros específicos de la tabla',
+        'Agrega nuevos registros (filas) a una tabla',
+        'Crea una nueva tabla en la base de datos',
+      ],
+      ok: 2,
+      exp: 'INSERT INTO agrega nuevas filas. Ejemplo: INSERT INTO estudiantes (nombre, codigo) VALUES (\'Ana\', \'001\');',
+    },
+    {
+      cat: 'DML',
+      q: '¿Qué cláusula se usa en SELECT para filtrar registros según una condición?',
+      opts: ['HAVING', 'WHERE', 'ORDER BY', 'GROUP BY'],
+      ok: 1,
+      exp: 'WHERE filtra filas que cumplan una condición. HAVING filtra grupos (post GROUP BY), ORDER BY ordena resultados.',
+    },
+    {
+      cat: 'DML',
+      q: '¿Qué comando DML se usa para modificar datos ya existentes en una tabla?',
+      opts: ['INSERT', 'MODIFY', 'CHANGE', 'UPDATE'],
+      ok: 3,
+      exp: 'UPDATE modifica valores en filas existentes. Ejemplo: UPDATE estudiantes SET nombre = \'Carlos\' WHERE codigo = \'001\'; Siempre usa WHERE para no afectar todos los registros.',
+    },
+  ],
+
+  web2: [
+    {
+      cat: 'npm',
+      q: '¿Qué hace el comando `npm init -y`?',
+      opts: [
+        'Instala todas las dependencias del package.json',
+        'Crea el archivo package.json con valores por defecto sin preguntas interactivas',
+        'Inicia el servidor de desarrollo',
+        'Instala Node.js en el sistema operativo',
+      ],
+      ok: 1,
+      exp: 'npm init -y crea automáticamente el package.json con valores por defecto. La bandera -y responde "yes" a todas las preguntas.',
+    },
+    {
+      cat: 'npm',
+      q: '¿Qué hace `npm install express`?',
+      opts: [
+        'Crea la estructura base de un proyecto Express',
+        'Inicia el servidor Express en el puerto 3000',
+        'Descarga Express en node_modules y lo agrega a "dependencies" en package.json',
+        'Actualiza Express a la versión más reciente',
+      ],
+      ok: 2,
+      exp: 'npm install <paquete> descarga el paquete de npmjs.com, lo guarda en node_modules y registra la dependencia en package.json.',
+    },
+    {
+      cat: 'npm',
+      q: '¿Qué hace el comando `npm run dev`?',
+      opts: [
+        'Descarga las dependencias listadas en package.json',
+        'Ejecuta el script "dev" definido en la sección scripts del package.json',
+        'Crea automáticamente la carpeta node_modules',
+        'Publica el proyecto en el registro npm',
+      ],
+      ok: 1,
+      exp: 'npm run <nombre> ejecuta el script con ese nombre en la sección "scripts" del package.json. Por ejemplo: "dev": "node --watch server.js".',
+    },
+    {
+      cat: 'package.json',
+      q: '¿En qué archivo se configuran los scripts de un proyecto Node.js?',
+      opts: ['index.js', 'server.config.js', 'node_modules/config.js', 'package.json'],
+      ok: 3,
+      exp: 'package.json es el archivo de configuración central. En su sección "scripts" defines los comandos ejecutables con npm run.',
+    },
+    {
+      cat: 'package.json',
+      q: '¿Qué propiedad debes agregar al package.json para usar `import/export` (ES Modules)?',
+      opts: ['"module": true', '"type": "module"', '"esm": "enabled"', '"syntax": "import"'],
+      ok: 1,
+      exp: 'Agregar "type": "module" indica a Node.js que los archivos .js usen ES Modules (import/export) en lugar de CommonJS (require).',
+    },
+    {
+      cat: 'package.json',
+      q: '¿Cómo se define el script de arranque en package.json para correr server.js con Node?',
+      opts: [
+        '"start": "node run server.js"',
+        '"start": "node server.js"',
+        '"start": "npm server.js"',
+        '"start": "execute server.js"',
+      ],
+      ok: 1,
+      exp: 'En "scripts": { "start": "node server.js" }. Luego se ejecuta con npm start o npm run start.',
+    },
+    {
+      cat: 'Express',
+      q: '¿Cuál es la forma correcta de crear un servidor básico con Express usando ES Modules?',
+      opts: [
+        'const app = new Express(); app.listen(3000)',
+        'import Express from "express"; Express.listen(3000)',
+        'import express from "express"; const app = express(); app.listen(3000)',
+        'const express = require(express); express.start(3000)',
+      ],
+      ok: 2,
+      exp: 'import express from "express"; const app = express(); app.listen(3000, () => console.log("Servidor listo")). Express exporta una función que debes invocar para obtener la instancia.',
+    },
+    {
+      cat: 'Fundamentos API',
+      q: '¿Cuál es la diferencia entre una petición GET y una petición POST en una API REST?',
+      opts: [
+        'No hay diferencia, ambas hacen lo mismo',
+        'GET obtiene datos sin modificarlos; POST envía datos para crear o procesar algo en el servidor',
+        'GET es más rápido que POST siempre',
+        'POST solo se usa para enviar archivos',
+      ],
+      ok: 1,
+      exp: 'GET es de solo lectura — solicita datos al servidor sin efectos secundarios. POST envía datos en el cuerpo de la petición para crear recursos o ejecutar acciones. Esta distinción es la base del diseño REST.',
+    },
+    {
+      cat: 'Express',
+      q: '¿Qué hace `res.json({ message: "ok" })` en una ruta de Express?',
+      opts: [
+        'Guarda el objeto en la base de datos',
+        'Imprime el objeto en la consola del servidor',
+        'Envía una respuesta HTTP con el objeto serializado como JSON al cliente',
+        'Redirige al cliente a la URL indicada en message',
+      ],
+      ok: 2,
+      exp: 'res.json() serializa el objeto a JSON, establece Content-Type: application/json y envía la respuesta. Es el estándar en APIs REST.',
+    },
+    {
+      cat: 'Fundamentos API',
+      q: '¿Qué significa API en el contexto del desarrollo web?',
+      opts: [
+        'Archivo de Programación Interna',
+        'Interfaz de Programación de Aplicaciones que permite la comunicación entre sistemas',
+        'Un servidor web que almacena bases de datos',
+        'Un lenguaje de programación para servidores',
+      ],
+      ok: 1,
+      exp: 'API (Application Programming Interface) es un contrato que define cómo dos sistemas se comunican. En desarrollo web, una API REST permite que el frontend consuma datos del backend mediante solicitudes HTTP.',
+    },
+  ],
+};
+
+/* ════════════════════════════════════════════════════════
+   ESTADO
+   ════════════════════════════════════════════════════════ */
+let S = newState();
+function newState() {
+  return {
+    courseId: null, group: null, student: null, integration: null, students: [], availability: [],
+    qi: 0, correct: 0, pts: 0, streak: 0, answered: false,
+    timerID: null, timeLeft: 30, finalScore: 0,
+  };
+}
+
+/* ════════════════════════════════════════════════════════
+   NAVEGACIÓN
+   ════════════════════════════════════════════════════════ */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ════════════════════════════════════════════════════════
+   SELECCIÓN DE CURSO
+   ════════════════════════════════════════════════════════ */
+function selectCourse(id) {
+  S.courseId = id;
+  const c = CFG.courses[id];
+  el('grp-title').textContent = c.label;
+  el('grp-grid').innerHTML = c.groups.map((g, i) => `
+    <div class="course-card ${id}" onclick="selectGroup(${i})" style="cursor:pointer">
+      <span class="icon">${i === 0 ? '1️⃣' : '2️⃣'}</span>
+      <h2>${g.label}</h2>
+    </div>`).join('');
+  show('s-groups');
+}
+
+async function selectGroup(i) {
+  S.group = CFG.courses[S.courseId].groups[i];
+  const c = CFG.courses[S.courseId];
+  el('st-title').textContent = `${c.label} — ${S.group.label}`;
+  el('st-sub').textContent   = 'Selecciona tu nombre de la lista';
+  show('s-students');
+  await loadStudents();
+}
+
+/* ════════════════════════════════════════════════════════
+   CARGAR ESTUDIANTES
+   ════════════════════════════════════════════════════════ */
+async function loadStudents() {
+  const token = S.group.token;
+  el('st-loading').style.display = 'flex';
+  el('st-error').style.display   = 'none';
+  el('st-content').style.display = 'none';
+  try {
+    const [r1, r2] = await Promise.all([
+      fetch(`${CFG.BASE_URL}/api/integrations/${token}`),
+      fetch(`${CFG.BASE_URL}/api/integrations/${token}/students`),
+    ]);
+    if (!r1.ok) throw new Error(`Error de integración (${r1.status})`);
+    if (!r2.ok) throw new Error(`Error al cargar estudiantes (${r2.status})`);
+    S.integration = await r1.json();
+    const studentsData = await r2.json();
+    if (!S.integration.course) throw new Error('La integración aún no tiene un curso asignado. Configúrala en e-notes antes de usar esta actividad.');
+
+    // Nueva estructura: studentsData.activities = [{ id, name, students: [{id,name}] }]
+    S.availability = studentsData.activities ?? [];
+
+    // Lista plana deduplicada de estudiantes con actividades pendientes
+    const seen = new Set();
+    S.students = [];
+    for (const act of S.availability) {
+      for (const s of act.students ?? []) {
+        if (!seen.has(s.id)) { seen.add(s.id); S.students.push(s); }
+      }
+    }
+    renderStudents(S.students);
+    el('st-loading').style.display = 'none';
+    el('st-content').style.display = 'block';
+  } catch (e) {
+    el('st-loading').style.display = 'none';
+    el('st-error').style.display   = 'block';
+    el('st-err-msg').textContent   = e.message;
+  }
+}
+
+function renderStudents(list) {
+  const c = el('st-list');
+  c.innerHTML = '';
+  if (!list.length) {
+    c.innerHTML = '<div style="padding:1.4rem;text-align:center;color:var(--muted)">Sin estudiantes</div>';
+    return;
+  }
+  list.forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'student-item';
+    d.innerHTML = `<div class="avatar">${initials(s.name)}</div><span>${esc(s.name)}</span>`;
+    d.onclick = () => selectStudent(s.id, s.name);
+    c.appendChild(d);
+  });
+}
+
+function filterStudents() {
+  const q = el('st-search').value.toLowerCase();
+  renderStudents(S.students.filter(s => s.name.toLowerCase().includes(q)));
+}
+
+function selectStudent(id, name) {
+  const used = getAttempts(S.courseId, id);
+  if (used >= 2) {
+    el('st-content').style.display    = 'none';
+    el('no-attempts-box').style.display = 'block';
+    el('no-attempts-msg').textContent =
+      `${name}, ya usaste los 2 intentos permitidos para este examen.`;
+    return;
+  }
+  S.student = { id, name };
+  countdown();
+}
+
+/* ════════════════════════════════════════════════════════
+   COUNTDOWN
+   ════════════════════════════════════════════════════════ */
+function countdown() {
+  show('s-countdown');
+  let n = 3;
+  tick(n);
+  const iv = setInterval(() => {
+    n--;
+    if (n === 0) {
+      clearInterval(iv);
+      el('cd-msg').textContent = '¡A responder!';
+      animCD('¡YA!');
+      setTimeout(startExam, 1000);
+    } else {
+      tick(n);
+    }
+  }, 1000);
+}
+function tick(n) {
+  el('cd-msg').textContent = 'El examen comenzará en breve';
+  animCD(String(n));
+}
+function animCD(txt) {
+  const e = el('cd-num');
+  e.textContent = txt;
+  e.classList.remove('cd-anim');
+  void e.offsetWidth;
+  e.classList.add('cd-anim');
+}
+
+/* ════════════════════════════════════════════════════════
+   EXAMEN
+   ════════════════════════════════════════════════════════ */
+function startExam() {
+  incrementAttempts(S.courseId, S.student.id);
+  S.qi = 0; S.correct = 0; S.pts = 0; S.streak = 0;
+  enableExamProtection();
+  show('s-exam');
+  renderQ();
+}
+
+function renderQ() {
+  const qs = EXAMS[S.courseId];
+  const q  = qs[S.qi];
+  const tot = qs.length;
+  S.answered = false;
+
+  el('q-badge').textContent = `${S.qi + 1} / ${tot}`;
+  el('pts-display').textContent = S.pts;
+  el('prog-fill').style.width = `${(S.qi / tot) * 100}%`;
+  updateStreak();
+
+  el('q-cat').textContent  = q.cat;
+  el('q-text').textContent = q.q;
+
+  const letters = ['A','B','C','D'];
+  el('opts').innerHTML = q.opts.map((o, i) => `
+    <button class="opt" id="opt${i}" onclick="answer(${i})">
+      <span class="opt-letter">${letters[i]}.</span>${esc(o)}
+    </button>`).join('');
+
+  el('feedback').style.display = 'none';
+  el('next-btn').style.display = 'none';
+
+  startTimer();
+}
+
+/* timer */
+const CIRC = 2 * Math.PI * 33;
+function startTimer() {
+  clearInterval(S.timerID);
+  S.timeLeft = 90;
+  drawTimer(90);
+  S.timerID = setInterval(() => {
+    S.timeLeft--;
+    drawTimer(S.timeLeft);
+    if (S.timeLeft <= 0) { clearInterval(S.timerID); if (!S.answered) timeUp(); }
+  }, 1000);
+}
+function drawTimer(t) {
+  el('t-label').textContent = t;
+  const ring = el('t-ring');
+  ring.style.strokeDasharray  = CIRC;
+  ring.style.strokeDashoffset = CIRC * (1 - t / 90);
+  if (t > 45)     { ring.style.stroke = '#7C3AED'; el('t-label').style.color = 'var(--text)'; }
+  else if (t > 20) { ring.style.stroke = '#f59e0b'; el('t-label').style.color = '#f59e0b'; }
+  else            { ring.style.stroke = '#ef4444'; el('t-label').style.color = '#ef4444'; }
+}
+function timeUp() {
+  S.answered = true; S.streak = 0; updateStreak();
+  const q = EXAMS[S.courseId][S.qi];
+  disableOpts();
+  el(`opt${q.ok}`).classList.add('reveal');
+  showFB(false, '⏰ ¡Tiempo agotado!', `Respuesta correcta: "${q.opts[q.ok]}". ${q.exp}`);
+}
+
+/* answer */
+function answer(i) {
+  if (S.answered) return;
+  S.answered = true;
+  clearInterval(S.timerID);
+  const q = EXAMS[S.courseId][S.qi];
+  const ok = i === q.ok;
+  disableOpts();
+  el(`opt${q.ok}`).classList.add('correct');
+  if (!ok) el(`opt${i}`).classList.add('wrong');
+  if (ok) {
+    S.streak++;
+    const bonus = Math.floor(S.timeLeft * 1.5);
+    const mult  = S.streak >= 3 ? 1.5 : 1;
+    const earned = Math.floor((100 + bonus) * mult);
+    S.pts += earned; S.correct++;
+    el('pts-display').textContent = S.pts;
+    const streakMsg = S.streak >= 3 ? ` 🔥 Racha x${S.streak}! (+${earned} pts)` : ` (+${earned} pts)`;
+    showFB(true, '✅ ¡Correcto!' + streakMsg, q.exp);
+  } else {
+    S.streak = 0;
+    showFB(false, '❌ Incorrecto', `Respuesta correcta: "${q.opts[q.ok]}". ${q.exp}`);
+  }
+  updateStreak();
+}
+
+function disableOpts() {
+  document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+}
+
+function showFB(ok, title, body) {
+  const fb = el('feedback');
+  fb.className = `feedback ${ok ? 'ok' : 'bad'}`;
+  el('fb-title').className = `fb-title ${ok ? 'ok' : 'bad'}`;
+  el('fb-title').textContent = title;
+  el('fb-body').textContent  = body;
+  fb.style.display = 'block';
+  el('next-btn').style.display = 'block';
+}
+
+function updateStreak() {
+  const sp = el('streak-pill');
+  if (S.streak >= 2) { sp.style.display = 'flex'; el('streak-n').textContent = S.streak; }
+  else sp.style.display = 'none';
+}
+
+function nextQ() {
+  S.qi++;
+  if (S.qi >= EXAMS[S.courseId].length) showResults();
+  else renderQ();
+}
+
+/* ════════════════════════════════════════════════════════
+   RESULTADOS
+   ════════════════════════════════════════════════════════ */
+function showResults() {
+  clearInterval(S.timerID);
+  disableExamProtection();
+  const tot = EXAMS[S.courseId].length;
+  const pct = S.correct / tot;
+  S.finalScore = parseFloat((pct * 5).toFixed(1));
+
+  let stars = '⭐', title = 'Sigue practicando 💪';
+  if (pct >= 0.8)      { stars = '⭐⭐⭐'; title = '¡Excelente! 🎉'; }
+  else if (pct >= 0.6) { stars = '⭐⭐';   title = '¡Bien hecho! 👏'; }
+
+  el('res-title').textContent   = title;
+  el('res-sub').textContent     = `${S.student.name} · ${CFG.courses[S.courseId].label} ${S.group.label}`;
+  el('res-stars').textContent   = stars;
+  el('res-score').textContent   = S.finalScore.toFixed(1);
+  el('res-correct').textContent = `${S.correct}/${tot}`;
+  el('res-pts').textContent     = S.pts;
+
+  const btn = el('submit-btn');
+  btn.disabled = false; btn.textContent = 'Enviar nota';
+  el('submit-status').textContent = '';
+  el('submit-status').className   = 'submit-status';
+
+  show('s-results');
+  if (pct >= 0.8) launchConfetti();
+}
+
+/* ════════════════════════════════════════════════════════
+   ENVIAR NOTA
+   ════════════════════════════════════════════════════════ */
+async function submitGrade() {
+  const token = S.group.token;
+  const btn   = el('submit-btn');
+  const st    = el('submit-status');
+
+  // Actividades donde este estudiante aún no tiene nota
+  const pending = S.availability.filter(act =>
+    act.students.some(s => s.id === S.student.id)
+  );
+
+  if (!pending.length) {
+    st.textContent = 'Este estudiante ya tiene nota registrada en todas las actividades.';
+    st.className   = 'submit-status';
+    btn.textContent = 'Sin actividades pendientes';
+    btn.disabled = true;
+    el('dl-btn').style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  st.textContent = '⏳ Conectando con e-notes…';
+  st.className   = 'submit-status';
+
+  let enotesStatus = '—';
+  let sent = 0;
+
+  try {
+    for (const activity of pending) {
+      const res  = await fetch(`${CFG.BASE_URL}/api/integrations/${token}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: S.student.id, activityId: activity.id, score: S.finalScore }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+      if (!data.skipped) sent++;
+
+      logToSheets({
+        studentName:  S.student.name,
+        course:       `${CFG.courses[S.courseId].label} ${S.group.label}`,
+        score:        S.finalScore,
+        status:       data.skipped ? 'ya existía' : 'enviada',
+        activityName: activity.name,
+      });
+    }
+    enotesStatus = 'enviada';
+    st.textContent = `✅ Nota ${S.finalScore}/5.0 registrada en ${sent} actividad(es) en e-notes.`;
+    st.className   = 'submit-status ok';
+    btn.textContent = 'Nota enviada ✓';
+  } catch (e) {
+    enotesStatus = `error: ${e.message}`;
+    st.textContent = `❌ e-notes no disponible — nota guardada en respaldo. (${e.message})`;
+    st.className   = 'submit-status err';
+    btn.disabled   = false;
+    btn.textContent = 'Reintentar e-notes';
+    logToSheets({
+      studentName:  S.student.name,
+      course:       `${CFG.courses[S.courseId].label} ${S.group.label}`,
+      score:        S.finalScore,
+      status:       enotesStatus,
+      activityName: pending.map(a => a.name).join(', '),
+    });
+  } finally {
+    el('dl-btn').style.display = 'block';
+  }
+}
+
+function logToSheets(entry) {
+  // no-cors: no podemos leer la respuesta pero el dato llega igual
+  fetch(CFG.SHEETS_URL, {
+    method: 'POST',
+    mode:   'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry),
+  }).catch(() => {}); // silencioso si falla la red
+}
+
+/* ════════════════════════════════════════════════════════
+   CONFETTI
+   ════════════════════════════════════════════════════════ */
+function launchConfetti() {
+  const box = el('confetti');
+  box.innerHTML = '';
+  const cols = ['#7C3AED','#ec4899','#f59e0b','#10b981','#3b82f6','#f97316'];
+  for (let i = 0; i < 90; i++) {
+    const d = document.createElement('div');
+    d.className = 'cfto';
+    d.style.cssText = `
+      left:${Math.random()*100}vw;
+      width:${Math.random()*10+5}px;height:${Math.random()*10+5}px;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      border-radius:${Math.random()>.5?'50%':'3px'};
+      animation-duration:${Math.random()*2+2}s;
+      animation-delay:${Math.random()*1.5}s;
+    `;
+    box.appendChild(d);
+  }
+  setTimeout(() => { box.innerHTML = ''; }, 6000);
+}
+
+/* ════════════════════════════════════════════════════════
+   REINICIO
+   ════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   INTENTOS (máx. 2 por estudiante por curso)
+   ════════════════════════════════════════════════════════ */
+const attKey = (c, s) => `exam_att_${c}_${s}`;
+function getAttempts(courseId, studentId)      { return parseInt(localStorage.getItem(attKey(courseId, studentId)) || '0'); }
+function incrementAttempts(courseId, studentId){ localStorage.setItem(attKey(courseId, studentId), String(getAttempts(courseId, studentId) + 1)); }
+
+/* ════════════════════════════════════════════════════════
+   PROTECCIÓN ANTI COPY-PASTE
+   ════════════════════════════════════════════════════════ */
+function _blockClipboard(e) { e.preventDefault(); }
+function _blockKey(e) { if (e.ctrlKey && ['c','v','x','a'].includes(e.key.toLowerCase())) e.preventDefault(); }
+
+function enableExamProtection() {
+  document.getElementById('s-exam').classList.add('exam-protected');
+  ['copy','paste','cut','contextmenu'].forEach(ev => document.addEventListener(ev, _blockClipboard));
+  document.addEventListener('keydown', _blockKey);
+}
+function disableExamProtection() {
+  document.getElementById('s-exam').classList.remove('exam-protected');
+  ['copy','paste','cut','contextmenu'].forEach(ev => document.removeEventListener(ev, _blockClipboard));
+  document.removeEventListener('keydown', _blockKey);
+}
+
+function restart() {
+  clearInterval(S.timerID);
+  disableExamProtection();
+  S = newState();
+  el('st-search').value = '';
+  el('no-attempts-box').style.display = 'none';
+  el('st-content').style.display      = 'none';
+  show('s-courses');
+}
+
+/* ════════════════════════════════════════════════════════
+   UTILS
+   ════════════════════════════════════════════════════════ */
+const el  = id => document.getElementById(id);
+const esc = s  => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const initials = name => name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+</script>
+</body>
+</html>
