@@ -114,12 +114,14 @@
     .card.placeholder { opacity: .35; cursor: default; pointer-events: none; }
 
     .card .icon {
-      font-size: 3rem;
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: .85rem;
       position: relative;
       z-index: 1;
     }
+    .card .icon svg { width: 2.8rem; height: 2.8rem; stroke-width: 1.5; }
     .card h2 {
       font-size: 1.1rem;
       font-weight: 700;
@@ -172,7 +174,7 @@
   <div class="grid">
 
     <a class="card recuperacion" href="examen-recuperacion/">
-      <span class="icon">📋</span>
+      <span class="icon"><i data-lucide="clipboard-list"></i></span>
       <h2>Examen de Recuperación</h2>
       <p>Selección múltiple con código Java</p>
     </a>
@@ -181,5 +183,8 @@
 
   <footer>eNotes · Integración externa — 2026</footer>
 
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

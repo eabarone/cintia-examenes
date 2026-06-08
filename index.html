@@ -97,12 +97,14 @@
     .card:hover::after { opacity: 1; }
 
     .card .icon {
-      font-size: 3.4rem;
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 1rem;
       position: relative;
       z-index: 1;
     }
+    .card .icon svg { width: 3rem; height: 3rem; stroke-width: 1.5; }
     .card h2 {
       font-size: 1.25rem;
       font-weight: 700;
@@ -146,14 +148,14 @@
 
   <div class="grid">
     <a class="card tecnico" href="tecnico/">
-      <span class="icon">🎓</span>
+      <span class="icon"><i data-lucide="graduation-cap"></i></span>
       <h2>Técnico Profesional</h2>
       <p>Accede a las actividades virtuales de tu programa</p>
       <span class="badge">Ver materias</span>
     </a>
 
     <a class="card sistemas" href="sistemas/">
-      <span class="icon">🖥️</span>
+      <span class="icon"><i data-lucide="monitor"></i></span>
       <h2>Ingeniería de Sistemas</h2>
       <p>Accede a las actividades virtuales de tu programa</p>
       <span class="badge">Ver materias</span>
@@ -162,5 +164,8 @@
 
   <footer>eNotes · Integración externa — 2026</footer>
 
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

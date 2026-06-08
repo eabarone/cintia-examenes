@@ -440,6 +440,8 @@
     .tab-switch-badge.low    { background: #fffbeb; color: #b7791f; }
     .tab-switch-badge.high   { background: #fff5f5; color: #9b2335; }
 
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* ───── RESPONSIVE ───── */
     @media (max-width: 600px) {
       header h1 { font-size: .88rem; }
@@ -481,16 +483,37 @@
 
     <div class="card">
       <h3 style="margin-bottom:1rem;color:var(--primary)">Identificación</h3>
-      <div class="form-group">
-        <label for="sel-student">Estudiante</label>
-        <select id="sel-student">
-          <option value="">— Selecciona tu nombre —</option>
-          <option value="06dfabb4-3cc6-417c-90b2-1a030d4042b1">MARIA JOSE OSORIO MERCADO</option>
-        </select>
+
+      <!-- Estado: cargando -->
+      <div id="st-loading" style="display:flex;align-items:center;gap:.7rem;color:var(--muted);font-size:.9rem;padding:.5rem 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;flex-shrink:0"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Cargando estudiantes...
       </div>
-      <div class="notice-info">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>La nota obtenida en este examen será registrada automáticamente en los parciales pendientes del <strong>Corte 1</strong> y el <strong>Corte 2</strong> (ambos con peso del 40%).</span>
+
+      <!-- Estado: error -->
+      <div id="st-error" style="display:none;background:#fff5f5;border:1px solid #fc8181;border-radius:8px;padding:.85rem 1rem;font-size:.88rem;color:#9b2335">
+        <strong>No se pudo cargar la lista de estudiantes.</strong>
+        <span id="st-error-msg"></span>
+        <br><button onclick="loadStudents()" style="margin-top:.6rem;background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:.4rem .9rem;cursor:pointer;font-size:.83rem">Reintentar</button>
+      </div>
+
+      <!-- Estado: sin pendientes -->
+      <div id="st-empty" style="display:none;background:#f0fff4;border:1px solid #9ae6b4;border-radius:8px;padding:.85rem 1rem;font-size:.88rem;color:#276749">
+        ✔ Todos los estudiantes ya tienen nota registrada en esta actividad.
+      </div>
+
+      <!-- Estado: listo -->
+      <div id="st-ready" style="display:none">
+        <div class="form-group">
+          <label for="sel-student">Estudiante</label>
+          <select id="sel-student">
+            <option value="">— Selecciona tu nombre —</option>
+          </select>
+        </div>
+        <div class="notice-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="notice-activities">La nota obtenida se registrará automáticamente en las actividades pendientes.</span>
+        </div>
       </div>
     </div>
 
@@ -559,13 +582,11 @@
 /* ══════════════════════════════════════════════════════════════════
    CONFIGURACIÓN
 ══════════════════════════════════════════════════════════════════ */
-const API_TOKEN = "1a7af693538b84ae4767b4cf89880cb228894c765289669c";
-const API_SUBMIT = `https://enotes.ecodestudio.dev/api/integrations/${API_TOKEN}/submit`;
+const API_TOKEN    = "1a7af693538b84ae4767b4cf89880cb228894c765289669c";
+const API_BASE     = "https://enotes.ecodestudio.dev/api/integrations/" + API_TOKEN;
+const API_SUBMIT   = API_BASE + "/submit";
+const API_STUDENTS = API_BASE + "/students";
 const DURATION_SECONDS = 90 * 60;
-const ACTIVITIES = [
-  { id: "e3f71811-4eab-4b07-93d8-37b634fdcea7", name: "Corte 1 – Parcial" },
-  { id: "288b66a4-b68b-4cd8-87d9-c770e865d882", name: "Corte 2 – Parcial" }
-];
 
 /* ══════════════════════════════════════════════════════════════════
    BANCO DE PREGUNTAS
@@ -954,6 +975,7 @@ class Carrito {
 const state = {
   studentId: null,
   studentName: null,
+  pendingActivities: [],
   answers: new Array(QUESTIONS.length).fill(null),
   timerInterval: null,
   secondsLeft: DURATION_SECONDS,
@@ -961,6 +983,73 @@ const state = {
   tabSwitches: 0,
   examActive: false
 };
+
+/* ══════════════════════════════════════════════════════════════════
+   CARGA DINÁMICA DE ESTUDIANTES
+══════════════════════════════════════════════════════════════════ */
+async function loadStudents() {
+  document.getElementById('st-loading').style.display = 'flex';
+  document.getElementById('st-error').style.display   = 'none';
+  document.getElementById('st-empty').style.display   = 'none';
+  document.getElementById('st-ready').style.display   = 'none';
+  document.getElementById('btn-start').disabled       = true;
+
+  try {
+    const res  = await fetch(API_STUDENTS);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Construir mapa: studentId → { name, activityIds[] }
+    const studentMap = new Map();
+    for (const act of data.activities ?? []) {
+      for (const s of act.students ?? []) {
+        if (!studentMap.has(s.id)) {
+          studentMap.set(s.id, { name: s.name, activities: [] });
+        }
+        studentMap.get(s.id).activities.push({ id: act.id, name: act.name });
+      }
+    }
+
+    document.getElementById('st-loading').style.display = 'none';
+
+    if (studentMap.size === 0) {
+      document.getElementById('st-empty').style.display = 'block';
+      return;
+    }
+
+    // Poblar el select
+    const sel = document.getElementById('sel-student');
+    sel.innerHTML = '<option value="">— Selecciona tu nombre —</option>';
+    studentMap.forEach((val, id) => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = val.name;
+      opt.dataset.activities = JSON.stringify(val.activities);
+      sel.appendChild(opt);
+    });
+
+    document.getElementById('st-ready').style.display = 'block';
+    document.getElementById('btn-start').disabled      = false;
+
+  } catch (err) {
+    document.getElementById('st-loading').style.display = 'none';
+    document.getElementById('st-error').style.display   = 'block';
+    document.getElementById('st-error-msg').textContent = ` — ${err.message}`;
+  }
+}
+
+// Actualizar el aviso cuando el estudiante cambia
+document.addEventListener('DOMContentLoaded', () => {
+  loadStudents();
+  document.getElementById('sel-student').addEventListener('change', function () {
+    const opt = this.options[this.selectedIndex];
+    if (!opt.dataset.activities) return;
+    const acts = JSON.parse(opt.dataset.activities);
+    const names = acts.map(a => `<strong>${a.name}</strong>`).join(' y ');
+    document.getElementById('notice-activities').innerHTML =
+      `La nota se registrará automáticamente en: ${names}.`;
+  });
+});
 
 /* ══════════════════════════════════════════════════════════════════
    UTILIDADES
@@ -1201,44 +1290,40 @@ function submitExam(timedOut = false) {
 async function reportGrade(grade) {
   const statusEl = document.getElementById('api-status');
   statusEl.className = 'sending';
-  statusEl.textContent = 'Reportando nota en los parciales pendientes…';
+  statusEl.textContent = 'Reportando nota en las actividades pendientes…';
 
   const results = await Promise.allSettled(
-    ACTIVITIES.map(act =>
+    state.pendingActivities.map(act =>
       fetch(API_SUBMIT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ studentId: state.studentId, activityId: act.id, score: grade })
-      }).then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return act.name;
+      }).then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        return { name: act.name, skipped: data.skipped === true };
       })
     )
   );
 
-  const ok   = results.filter(r => r.status === 'fulfilled').map(r => r.value);
-  const fail = results.filter(r => r.status === 'rejected');
+  const sent    = results.filter(r => r.status === 'fulfilled' && !r.value.skipped).map(r => r.value.name);
+  const skipped = results.filter(r => r.status === 'fulfilled' &&  r.value.skipped).map(r => r.value.name);
+  const failed  = results.filter(r => r.status === 'rejected');
 
-  if (fail.length === 0) {
+  if (failed.length === 0) {
     statusEl.className = 'success';
-    statusEl.innerHTML =
-      `✔ Nota <strong>${grade.toFixed(1)}</strong> registrada exitosamente en:<br>` +
-      ok.map(n => `&nbsp;&nbsp;· ${n}`).join('<br>');
-  } else if (ok.length > 0) {
-    statusEl.className = 'error';
-    statusEl.innerHTML =
-      `⚠ Nota registrada parcialmente.<br>` +
-      `Éxito en: ${ok.join(', ')}<br>` +
-      `Error en: ${fail.map((_,i) => ACTIVITIES[results.indexOf(results.filter(r=>r.status==='rejected')[i])].name).join(', ')}<br><br>` +
-      `<strong>Nota: ${grade.toFixed(1)} / 5.0</strong> — reportar manualmente si es necesario.`;
+    let html = '';
+    if (sent.length)    html += `✔ Nota <strong>${grade.toFixed(1)}</strong> registrada en: ${sent.join(', ')}.<br>`;
+    if (skipped.length) html += `ℹ Ya tenía nota registrada en: ${skipped.join(', ')} (no se modificó).`;
+    statusEl.innerHTML = html;
   } else {
-    const payloads = ACTIVITIES.map(act =>
-      JSON.stringify({ studentId: state.studentId, activityId: act.id, grade })
+    const payloads = state.pendingActivities.map(act =>
+      JSON.stringify({ studentId: state.studentId, activityId: act.id, score: grade })
     ).join('\n');
     statusEl.className = 'error';
     statusEl.innerHTML =
       `⚠ No se pudo reportar la nota automáticamente.<br>
-       <small>Error: ${fail[0].reason?.message}</small><br><br>
+       <small>Error: ${failed[0].reason?.message}</small><br><br>
        <strong>Nota obtenida: ${grade.toFixed(1)} / 5.0</strong><br>
        <small>Payloads para reporte manual:</small><br>
        <code style="font-size:.78rem;word-break:break-all;white-space:pre-wrap">${payloads}</code>`;
@@ -1256,8 +1341,10 @@ document.getElementById('btn-start').addEventListener('click', () => {
     return;
   }
 
-  state.studentId   = studentSel.value;
-  state.studentName = studentSel.options[studentSel.selectedIndex].text;
+  const selectedOpt = studentSel.options[studentSel.selectedIndex];
+  state.studentId         = studentSel.value;
+  state.studentName       = selectedOpt.text;
+  state.pendingActivities = JSON.parse(selectedOpt.dataset.activities || '[]');
 
   document.querySelector('#app-header h1').textContent =
     `${state.studentName.split(' ')[0]} · Examen de Recuperación`;

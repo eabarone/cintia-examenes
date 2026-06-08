@@ -56,8 +56,18 @@
       font-family: 'Poppins', sans-serif; font-size: .9rem;
       display: flex; align-items: center; gap: .4rem;
       margin-bottom: 1.5rem; transition: color .2s;
+      text-decoration: none;
     }
     .back-btn:hover { color: var(--text); }
+    .back-home {
+      position: fixed; top: 1.2rem; left: 1.2rem;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--muted); font-family: 'Poppins', sans-serif;
+      font-size: .85rem; padding: .45rem .9rem; border-radius: 8px;
+      cursor: pointer; text-decoration: none; transition: color .2s, border-color .2s;
+      display: flex; align-items: center; gap: .4rem; z-index: 50;
+    }
+    .back-home:hover { color: var(--text); border-color: rgba(255,255,255,.25); }
 
     /* ── SCREEN 1: COURSES ── */
     .courses-wrap { width: 100%; max-width: 680px; text-align: center; }
@@ -81,7 +91,8 @@
     .course-card.web2::after { background: linear-gradient(135deg, rgba(236,72,153,.25), rgba(245,158,11,.2)); }
     .course-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,.25); }
     .course-card:hover::after { opacity: 1; }
-    .course-card .icon { font-size: 3.2rem; display: block; margin-bottom: .9rem; position: relative; z-index: 1; }
+    .course-card .icon { display: flex; align-items: center; justify-content: center; margin-bottom: .9rem; position: relative; z-index: 1; }
+    .course-card .icon svg { width: 3rem; height: 3rem; stroke-width: 1.5; }
     .course-card h2 { font-size: 1.2rem; font-weight: 700; position: relative; z-index: 1; }
     .course-card p { color: var(--muted); font-size: .85rem; margin-top: .4rem; position: relative; z-index: 1; }
     .badge {
@@ -294,6 +305,8 @@
 </head>
 <body>
 
+<a class="back-home" href="../">← Inicio</a>
+
 <!-- ═══════════════════════════ SCREEN 1: COURSE SELECTION ═══════════════════════════ -->
 <div class="screen active" id="s-courses">
   <div class="courses-wrap">
@@ -302,13 +315,13 @@
     <p class="subtitle">Selecciona el curso al que perteneces</p>
     <div class="courses-grid">
       <div class="course-card db" onclick="selectCourse('db')">
-        <span class="icon">🗄️</span>
+        <span class="icon"><i data-lucide="database"></i></span>
         <h2>Base de Datos</h2>
         <p>Modelo Entidad-Relación, DDL y DML</p>
         <span class="badge">10 preguntas</span>
       </div>
       <div class="course-card web2" onclick="selectCourse('web2')">
-        <span class="icon">🚀</span>
+        <span class="icon"><i data-lucide="globe"></i></span>
         <h2>Programación Web II</h2>
         <p>Node.js, npm y Express</p>
         <span class="badge">10 preguntas</span>
@@ -1126,5 +1139,8 @@ const el  = id => document.getElementById(id);
 const esc = s  => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const initials = name => name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
 </script>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>
