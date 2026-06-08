@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parcial Virtual – Programación III</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #1e3a5f;
+      --accent:    #2ecc71;
+      --danger:    #e74c3c;
+      --warn:      #f39c12;
+      --bg:        #f0f4f8;
+      --card:      #ffffff;
+      --text:      #1a202c;
+      --muted:     #718096;
+      --border:    #e2e8f0;
+      --code-bg:   #1e1e2e;
+      --code-text: #cdd6f4;
+      --radius:    10px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ───── HEADER ───── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    header h1 { font-size: 1rem; font-weight: 700; letter-spacing: .3px; }
+    #timer-box {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+    #timer-box svg { flex-shrink: 0; }
+    #timer-display { min-width: 60px; text-align: right; }
+    #timer-display.warn  { color: var(--warn); }
+    #timer-display.danger { color: var(--danger); animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ───── PROGRESS BAR ───── */
+    #progress-bar-wrap {
+      background: #c3d0dd;
+      height: 5px;
+      position: sticky;
+      top: 56px;
+      z-index: 99;
+    }
+    #progress-bar {
+      height: 100%;
+      background: var(--accent);
+      transition: width .4s ease;
+      width: 0%;
+    }
+
+    /* ───── LAYOUT ───── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* ───── CARD ───── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ───── START SCREEN ───── */
+    #screen-start .hero {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+    }
+    .badge-course {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: .3rem .9rem;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+    #screen-start h2 {
+      font-size: 1.9rem;
+      color: var(--primary);
+      margin-bottom: .5rem;
+    }
+    #screen-start p.subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .info-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      text-align: center;
+    }
+    .info-item .label { font-size: .7rem; text-transform: uppercase; color: var(--muted); letter-spacing: .8px; }
+    .info-item .value { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-top: .2rem; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: .9rem;
+      margin-bottom: .4rem;
+      color: var(--primary);
+    }
+    .form-group select, .form-group input {
+      width: 100%;
+      padding: .65rem .85rem;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: .95rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+      transition: border-color .2s;
+    }
+    .form-group select:focus, .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .rules ul {
+      list-style: none;
+      padding: 0;
+    }
+    .rules ul li {
+      padding: .45rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: .6rem;
+      font-size: .9rem;
+    }
+    .rules ul li:last-child { border-bottom: none; }
+    .rules ul li::before {
+      content: "✦";
+      color: var(--primary);
+      font-size: .7rem;
+      margin-top: .25rem;
+      flex-shrink: 0;
+    }
+
+    /* ───── BUTTONS ───── */
+    .btn {
+      display: inline-block;
+      padding: .75rem 2rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      transition: opacity .2s, transform .1s;
+      font-family: inherit;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { opacity: .88; }
+    .btn-accent  { background: var(--accent);  color: #fff; }
+    .btn-accent:hover:not(:disabled) { opacity: .88; }
+    .btn-danger  { background: var(--danger);  color: #fff; }
+    .btn-block   { width: 100%; text-align: center; }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    /* ───── EXAM SCREEN ───── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1.25rem;
+    }
+    .section-pill {
+      background: var(--primary);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: .25rem .75rem;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .section-title { font-size: 1.15rem; font-weight: 700; color: var(--primary); }
+    .section-pts   { font-size: .82rem; color: var(--muted); margin-left: auto; }
+
+    /* ───── QUESTION CARD ───── */
+    .question-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: border-color .2s;
+    }
+    .question-card.answered { border-color: var(--accent); }
+    .question-card.wrong    { border-color: var(--danger); }
+    .question-card.correct  { border-color: var(--accent); }
+
+    .q-number {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      padding: .15rem .55rem;
+      border-radius: 4px;
+      margin-bottom: .75rem;
+    }
+    .q-text {
+      font-size: .97rem;
+      margin-bottom: 1rem;
+      line-height: 1.7;
+    }
+    pre.code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: .83rem;
+      padding: 1rem 1.2rem;
+      border-radius: 7px;
+      overflow-x: auto;
+      margin: .8rem 0 1rem;
+      line-height: 1.55;
+      tab-size: 4;
+    }
+    .options { list-style: none; display: flex; flex-direction: column; gap: .55rem; }
+    .options li label {
+      display: flex;
+      align-items: flex-start;
+      gap: .65rem;
+      padding: .7rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      font-size: .93rem;
+    }
+    .options li label:hover { background: #f7fafc; border-color: #a0aec0; }
+    .options li input[type=radio] { margin-top: .2rem; accent-color: var(--primary); flex-shrink: 0; }
+    .options li.selected label { background: #ebf8ff; border-color: var(--primary); }
+    .options li.correct-answer label { background: #f0fff4; border-color: var(--accent); font-weight: 600; }
+    .options li.wrong-answer  label { background: #fff5f5; border-color: var(--danger); text-decoration: line-through; }
+
+    /* ───── FLOATING SUBMIT ───── */
+    #submit-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: .9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 200;
+      box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+    }
+    #answered-count { font-size: .88rem; color: var(--muted); }
+    #answered-count span { font-weight: 700; color: var(--primary); }
+
+    /* ───── RESULTS ───── */
+    #screen-results .hero { text-align: center; padding: 2rem 1rem 1rem; }
+    .score-ring {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      font-size: 2.5rem;
+      font-weight: 900;
+      border: 6px solid var(--accent);
+      margin: 1rem auto 1.5rem;
+    }
+    .score-ring.fail   { border-color: var(--danger); color: var(--danger); }
+    .score-ring.pass   { border-color: var(--accent); color: var(--accent); }
+    .score-ring.great  { border-color: #3498db;       color: #3498db; }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .results-stat {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      text-align: center;
+    }
+    .results-stat .label { font-size: .7rem; text-transform: uppercase; color: var(--muted); letter-spacing: .8px; }
+    .results-stat .value { font-size: 1.4rem; font-weight: 800; margin-top: .25rem; }
+    .results-stat .value.green  { color: var(--accent); }
+    .results-stat .value.red    { color: var(--danger); }
+    .results-stat .value.blue   { color: #3498db; }
+    .results-stat .value.orange { color: var(--warn); }
+
+    #api-status {
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: .9rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    #api-status.sending  { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+    #api-status.success  { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+    #api-status.error    { background: #fff5f5; color: #9b2335; border: 1px solid #fc8181; }
+
+    #review-section { margin-top: 2rem; }
+    #review-section h3 { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; }
+
+    .review-item {
+      padding: .9rem 1rem;
+      border-radius: 8px;
+      margin-bottom: .6rem;
+      font-size: .88rem;
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+    }
+    .review-item.ok   { background: #f0fff4; border-left: 3px solid var(--accent); }
+    .review-item.fail { background: #fff5f5; border-left: 3px solid var(--danger); }
+    .review-icon { font-size: 1rem; flex-shrink: 0; }
+    .review-text .q { font-weight: 600; color: var(--text); }
+    .review-text .ans { color: var(--muted); font-size: .83rem; margin-top: .2rem; }
+
+    /* ───── MODAL ───── */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-overlay.open { display: flex; }
+    #modal {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 2rem;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    #modal h3 { font-size: 1.1rem; margin-bottom: .75rem; color: var(--primary); }
+    #modal p  { font-size: .93rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+    .modal-buttons { display: flex; gap: .75rem; justify-content: flex-end; }
+
+    /* ───── NOTICE ───── */
+    .notice-info {
+      display: flex;
+      gap: .65rem;
+      align-items: flex-start;
+      background: #ebf8ff;
+      border: 1px solid #bee3f8;
+      border-radius: 8px;
+      padding: .85rem 1rem;
+      font-size: .88rem;
+      color: #2c5282;
+      line-height: 1.55;
+    }
+
+    /* ───── ANTI-TRAMPA ───── */
+    #cheat-toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: #2d3748;
+      color: #fff;
+      padding: .7rem 1.4rem;
+      border-radius: 8px;
+      font-size: .88rem;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,.35);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      white-space: nowrap;
+    }
+    #cheat-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #cheat-toast.warn-color { background: #c53030; }
+
+    .tab-switch-badge {
+      display: inline-block;
+      padding: .15rem .55rem;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 700;
+      margin-left: .4rem;
+      vertical-align: middle;
+    }
+    .tab-switch-badge.none   { background: #f0fff4; color: #276749; }
+    .tab-switch-badge.low    { background: #fffbeb; color: #b7791f; }
+    .tab-switch-badge.high   { background: #fff5f5; color: #9b2335; }
+
+    /* ───── RESPONSIVE ───── */
+    @media (max-width: 600px) {
+      header h1 { font-size: .88rem; }
+      .card { padding: 1.25rem; }
+      #screen-start h2 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="app-header">
+  <h1>Programación III — Parcial Virtual</h1>
+  <div id="timer-box" style="display:none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span id="timer-display">90:00</span>
+  </div>
+</header>
+<div id="progress-bar-wrap" style="display:none"><div id="progress-bar"></div></div>
+
+<!-- ═══════════ SCREEN: START ═══════════ -->
+<section id="screen-start" class="screen active">
+  <div class="container" style="max-width:680px">
+
+    <div class="hero">
+      <div class="badge-course">Ingeniería de Sistemas</div>
+      <h2>Examen de Recuperación</h2>
+      <p class="subtitle">Programación III &nbsp;·&nbsp; Java &nbsp;·&nbsp; 25 preguntas &nbsp;·&nbsp; 90 minutos</p>
+
+      <div class="info-grid">
+        <div class="info-item"><div class="label">Duración</div><div class="value">90 min</div></div>
+        <div class="info-item"><div class="label">Preguntas</div><div class="value">25</div></div>
+        <div class="info-item"><div class="label">Puntaje total</div><div class="value">5.0 pts</div></div>
+        <div class="info-item"><div class="label">Aprobación</div><div class="value">≥ 3.0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:1rem;color:var(--primary)">Identificación</h3>
+      <div class="form-group">
+        <label for="sel-student">Estudiante</label>
+        <select id="sel-student">
+          <option value="">— Selecciona tu nombre —</option>
+          <option value="06dfabb4-3cc6-417c-90b2-1a030d4042b1">MARIA JOSE OSORIO MERCADO</option>
+        </select>
+      </div>
+      <div class="notice-info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>La nota obtenida en este examen será registrada automáticamente en los parciales pendientes del <strong>Corte 1</strong> y el <strong>Corte 2</strong> (ambos con peso del 40%).</span>
+      </div>
+    </div>
+
+    <div class="card rules">
+      <h3 style="margin-bottom:.85rem;color:var(--primary)">Instrucciones</h3>
+      <ul>
+        <li>El examen tiene <strong>25 preguntas de selección múltiple</strong> sobre los temas del curso.</li>
+        <li>Cada pregunta correcta vale <strong>0.2 puntos</strong>. No hay puntos negativos por error.</li>
+        <li>Tienes <strong>90 minutos</strong> a partir del momento en que inicies. El tiempo no se detiene.</li>
+        <li>Una vez enviado el examen <strong>no podrás modificar tus respuestas</strong>.</li>
+        <li>Al finalizar, la nota se reportará automáticamente al sistema de calificaciones.</li>
+        <li>Temas: POO · Herencia múltiple · Interfaces · Lambda · Interfaces funcionales · Patrones de diseño.</li>
+      </ul>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="btn-start">Iniciar Examen</button>
+  </div>
+</section>
+
+<!-- ═══════════ SCREEN: EXAM ═══════════ -->
+<section id="screen-exam" class="screen">
+  <div class="container" id="exam-container"></div>
+  <div id="submit-bar">
+    <div id="answered-count">Respondidas: <span id="cnt">0</span> / 25</div>
+    <button class="btn btn-accent" id="btn-submit">Enviar examen</button>
+  </div>
+</section>
+
+<!-- ═══════════ SCREEN: RESULTS ═══════════ -->
+<section id="screen-results" class="screen">
+  <div class="container" style="max-width:740px">
+    <div class="hero">
+      <div id="score-ring" class="score-ring"></div>
+      <h2 id="result-title" style="color:var(--primary);margin-bottom:.3rem"></h2>
+      <p id="result-subtitle" style="color:var(--muted)"></p>
+    </div>
+
+    <div class="card">
+      <div class="results-grid" id="results-grid"></div>
+      <div id="api-status" class="sending">Reportando nota al sistema…</div>
+    </div>
+
+    <div class="card" id="review-section">
+      <h3>Revisión de respuestas</h3>
+      <div id="review-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TOAST ANTI-TRAMPA -->
+<div id="cheat-toast"></div>
+
+<!-- MODAL CONFIRM -->
+<div id="modal-overlay">
+  <div id="modal">
+    <h3>¿Enviar examen?</h3>
+    <p id="modal-msg">Una vez enviado no podrás cambiar tus respuestas. ¿Estás seguro/a de continuar?</p>
+    <div class="modal-buttons">
+      <button class="btn btn-outline" id="modal-cancel">Cancelar</button>
+      <button class="btn btn-danger"  id="modal-confirm">Sí, enviar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   CONFIGURACIÓN
+══════════════════════════════════════════════════════════════════ */
+const API_TOKEN = "1a7af693538b84ae4767b4cf89880cb228894c765289669c";
+const API_SUBMIT = `https://enotes.ecodestudio.dev/api/integrations/${API_TOKEN}/submit`;
+const DURATION_SECONDS = 90 * 60;
+const ACTIVITIES = [
+  { id: "e3f71811-4eab-4b07-93d8-37b634fdcea7", name: "Corte 1 – Parcial" },
+  { id: "288b66a4-b68b-4cd8-87d9-c770e865d882", name: "Corte 2 – Parcial" }
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   BANCO DE PREGUNTAS
+   correct: índice (0-3) de la opción correcta
+══════════════════════════════════════════════════════════════════ */
+const QUESTIONS = [
+
+  /* ─── SECCIÓN 1: POO ─────────────────────────── */
+  {
+    section: "Programación Orientada a Objetos (POO)",
+    sectionId: 1,
+    text: "¿Cuál de los siguientes principios de POO consiste en ocultar los detalles internos de un objeto y exponer solo lo necesario a través de métodos públicos?",
+    options: ["Herencia", "Polimorfismo", "Encapsulamiento", "Abstracción"],
+    correct: 2
+  },
+  {
+    section: "Programación Orientada a Objetos (POO)",
+    sectionId: 1,
+    text: "¿Cuál es la salida del siguiente código Java?",
+    code: `class Animal {
+    void sonido() { System.out.println("Sonido generico"); }
+}
+class Perro extends Animal {
+    @Override
+    void sonido() { System.out.println("Guau"); }
+}
+public class Main {
+    public static void main(String[] args) {
+        Animal a = new Perro();
+        a.sonido();
+    }
+}`,
+    options: ["Sonido generico", "Guau", "Error de compilación", "null"],
+    correct: 1
+  },
+  {
+    section: "Programación Orientada a Objetos (POO)",
+    sectionId: 1,
+    text: "¿Cuál es la diferencia correcta entre <strong>sobreescritura (override)</strong> y <strong>sobrecarga (overload)</strong> en Java?",
+    options: [
+      "Override: mismo nombre, distintos parámetros en la misma clase. Overload: mismo nombre y parámetros en subclase.",
+      "Override: subclase redefine un método con la misma firma. Overload: misma clase con métodos de mismo nombre y distintos parámetros.",
+      "Son sinónimos en Java.",
+      "Override aplica solo a métodos estáticos; Overload aplica a constructores."
+    ],
+    correct: 1
+  },
+  {
+    section: "Programación Orientada a Objetos (POO)",
+    sectionId: 1,
+    text: "¿Cuál es la salida del siguiente código?",
+    code: `abstract class Figura {
+    abstract double area();
+    void describir() {
+        System.out.println("Area: " + area());
+    }
+}
+class Cuadrado extends Figura {
+    double lado;
+    Cuadrado(double l) { this.lado = l; }
+    double area() { return lado * lado; }
+}
+public class Main {
+    public static void main(String[] args) {
+        Figura f = new Cuadrado(4);
+        f.describir();
+    }
+}`,
+    options: ["Area: 0.0", "Area: 16.0", "Error de compilación: no se puede instanciar clase abstracta", "Area: 4.0"],
+    correct: 1
+  },
+  {
+    section: "Programación Orientada a Objetos (POO)",
+    sectionId: 1,
+    text: "En Java, ¿qué hace la siguiente instrucción dentro de un constructor de subclase?<br><code style='background:#edf2f7;padding:2px 6px;border-radius:4px;font-family:monospace'>super(\"Java\", 2024);</code>",
+    options: [
+      "Llama al método super() definido en la superclase.",
+      "Crea una nueva instancia de la superclase.",
+      "Invoca el constructor de la superclase pasando los argumentos indicados.",
+      "Declara que la clase hereda de una superclase con esos parámetros."
+    ],
+    correct: 2
+  },
+
+  /* ─── SECCIÓN 2: HERENCIA MÚLTIPLE E INTERFACES ─ */
+  {
+    section: "Herencia Múltiple e Interfaces",
+    sectionId: 2,
+    text: "Java no permite herencia múltiple de clases. ¿Cuál es la razón principal y cómo se soluciona?",
+    options: [
+      "Porque Java es un lenguaje interpretado; se soluciona con genéricos.",
+      "Para evitar el 'problema del diamante' (ambigüedad de herencia); se soluciona implementando múltiples interfaces.",
+      "Porque las clases abstractas lo impiden; se soluciona con composición.",
+      "Por limitaciones de la JVM; se soluciona con herencia de un solo nivel."
+    ],
+    correct: 1
+  },
+  {
+    section: "Herencia Múltiple e Interfaces",
+    sectionId: 2,
+    text: "¿Cuál es la salida del siguiente código?",
+    code: `interface Volador {
+    default String mover() { return "Volar"; }
+}
+interface Nadador {
+    default String mover() { return "Nadar"; }
+}
+class Pato implements Volador, Nadador {
+    public String mover() {
+        return Volador.super.mover() + " y " + Nadador.super.mover();
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(new Pato().mover());
+    }
+}`,
+    options: ["Volar", "Nadar", "Volar y Nadar", "Error de compilación por conflicto de default methods"],
+    correct: 2
+  },
+  {
+    section: "Herencia Múltiple e Interfaces",
+    sectionId: 2,
+    text: "¿Cuál es una diferencia clave entre una <strong>clase abstracta</strong> y una <strong>interfaz</strong> en Java 8+?",
+    options: [
+      "Las interfaces no pueden tener ningún método con implementación.",
+      "Una clase abstracta puede tener atributos de instancia con estado; una interfaz solo puede declarar constantes (static final).",
+      "Una clase puede extender múltiples clases abstractas.",
+      "Las interfaces son más rápidas en tiempo de ejecución que las clases abstractas."
+    ],
+    correct: 1
+  },
+  {
+    section: "Herencia Múltiple e Interfaces",
+    sectionId: 2,
+    text: "¿Qué keywords se usan respectivamente para heredar de una clase y para implementar una interfaz en Java?",
+    options: [
+      "<code>implements</code> y <code>extends</code>",
+      "<code>extends</code> e <code>implements</code>",
+      "<code>inherits</code> e <code>implements</code>",
+      "<code>extends</code> y <code>interface</code>"
+    ],
+    correct: 1
+  },
+  {
+    section: "Herencia Múltiple e Interfaces",
+    sectionId: 2,
+    text: "¿Qué sucede al compilar el siguiente código?",
+    code: `interface Imprimible {
+    void imprimir();
+}
+interface Exportable {
+    void exportar();
+}
+class Documento implements Imprimible, Exportable {
+    public void imprimir() { System.out.println("Imprimiendo..."); }
+    // exportar() no implementado
+}`,
+    options: [
+      "Compila correctamente porque exportar() tiene implementación por defecto.",
+      "Error de compilación: Documento debe implementar exportar() de Exportable.",
+      "Error de compilación: no se pueden implementar dos interfaces.",
+      "Compila pero lanza NullPointerException en tiempo de ejecución."
+    ],
+    correct: 1
+  },
+
+  /* ─── SECCIÓN 3: LAMBDA E INTERFACES FUNCIONALES ─ */
+  {
+    section: "Funciones Lambda e Interfaces Funcionales",
+    sectionId: 3,
+    text: "¿Cuál de las siguientes es la sintaxis <strong>correcta</strong> de una expresión lambda en Java que recibe dos enteros y retorna su suma?",
+    options: [
+      "<code>lambda(a, b) -> a + b</code>",
+      "<code>(int a, int b) => a + b</code>",
+      "<code>(a, b) -> a + b</code>",
+      "<code>function(a, b) { return a + b; }</code>"
+    ],
+    correct: 2
+  },
+  {
+    section: "Funciones Lambda e Interfaces Funcionales",
+    sectionId: 3,
+    text: "¿Qué interfaz funcional del paquete <code>java.util.function</code> representa una función que <strong>recibe un valor de tipo T</strong> y <strong>no retorna nada</strong>?",
+    options: ["<code>Supplier&lt;T&gt;</code>", "<code>Function&lt;T, Void&gt;</code>", "<code>Predicate&lt;T&gt;</code>", "<code>Consumer&lt;T&gt;</code>"],
+    correct: 3
+  },
+  {
+    section: "Funciones Lambda e Interfaces Funcionales",
+    sectionId: 3,
+    text: "Sobre la anotación <code>@FunctionalInterface</code>, ¿cuál afirmación es <strong>correcta</strong>?",
+    options: [
+      "Es obligatoria para que Java reconozca una interfaz como funcional.",
+      "Convierte automáticamente cualquier interfaz en funcional, sin importar cuántos métodos tenga.",
+      "Es opcional pero hace que el compilador verifique que la interfaz tenga exactamente un método abstracto.",
+      "Solo puede usarse con interfaces que extienden <code>Runnable</code>."
+    ],
+    correct: 2
+  },
+  {
+    section: "Funciones Lambda e Interfaces Funcionales",
+    sectionId: 3,
+    text: "¿Cuál es la salida del siguiente código con Streams y lambdas?",
+    code: `import java.util.Arrays;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        List<String> nombres = Arrays.asList("Ana", "Carlos", "Alba", "Beatriz");
+        nombres.stream()
+               .filter(n -> n.startsWith("A"))
+               .map(String::toUpperCase)
+               .forEach(System.out::println);
+    }
+}`,
+    options: ["ANA\nCARLOS\nALBA\nBEATRIZ", "ANA\nALBA", "ana\nalba", "Error: map no acepta referencias a métodos"],
+    correct: 1
+  },
+  {
+    section: "Funciones Lambda e Interfaces Funcionales",
+    sectionId: 3,
+    text: "¿Cuál interfaz funcional se debe usar para representar una función que <strong>recibe un <code>String</code> y retorna un <code>boolean</code></strong>?",
+    options: [
+      "<code>Function&lt;String, Boolean&gt;</code>",
+      "<code>Predicate&lt;String&gt;</code>",
+      "<code>BiFunction&lt;String, Boolean, String&gt;</code>",
+      "<code>Supplier&lt;Boolean&gt;</code>"
+    ],
+    correct: 1
+  },
+
+  /* ─── SECCIÓN 4: PATRONES DE DISEÑO ──────────── */
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "¿Qué garantiza el patrón de diseño <strong>Singleton</strong>?",
+    options: [
+      "Que todos los métodos de la clase sean estáticos y accesibles sin instanciar.",
+      "Que una clase tenga exactamente una instancia en toda la aplicación y se provea un punto de acceso global a ella.",
+      "Que la clase no pueda ser heredada por ninguna subclase.",
+      "Que la creación del objeto sea siempre thread-safe con sincronización automática."
+    ],
+    correct: 1
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "De las dos implementaciones de Singleton a continuación, ¿cuál es <strong>thread-safe</strong> sin necesidad de sincronización adicional?",
+    code: `// Opción A – Lazy initialization sin sincronización
+class SingletonA {
+    private static SingletonA instance;
+    private SingletonA() {}
+    public static SingletonA getInstance() {
+        if (instance == null) instance = new SingletonA(); // peligro race condition
+        return instance;
+    }
+}
+
+// Opción B – Eager initialization
+class SingletonB {
+    private static final SingletonB INSTANCE = new SingletonB();
+    private SingletonB() {}
+    public static SingletonB getInstance() { return INSTANCE; }
+}`,
+    options: ["Solo la Opción A", "Solo la Opción B", "Ambas son thread-safe", "Ninguna es thread-safe"],
+    correct: 1
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "¿Cuál es la intención principal del patrón <strong>Factory Method</strong>?",
+    options: [
+      "Crear familias enteras de objetos relacionados sin especificar sus clases concretas.",
+      "Definir una interfaz para crear un objeto, pero dejar que las subclases decidan qué clase concreta instanciar.",
+      "Garantizar que solo exista una instancia de la clase fábrica.",
+      "Construir objetos complejos paso a paso mediante un director y un builder."
+    ],
+    correct: 1
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "¿Cuál es la diferencia principal entre <strong>Factory Method</strong> y <strong>Abstract Factory</strong>?",
+    options: [
+      "Factory Method crea un único tipo de producto; Abstract Factory crea familias de productos relacionados.",
+      "Abstract Factory solo funciona con interfaces, Factory Method con clases abstractas.",
+      "Factory Method requiere obligatoriamente una clase padre abstracta; Abstract Factory no.",
+      "No existe diferencia significativa; son el mismo patrón con distinto nombre."
+    ],
+    correct: 0
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "¿Qué patrón de diseño se está aplicando en el siguiente código?",
+    code: `interface OrdenStrategy {
+    double calcularTotal(double subtotal);
+}
+class DescuentoNormal implements OrdenStrategy {
+    public double calcularTotal(double subtotal) { return subtotal; }
+}
+class DescuentoVIP implements OrdenStrategy {
+    public double calcularTotal(double subtotal) { return subtotal * 0.80; }
+}
+class Carrito {
+    private OrdenStrategy estrategia;
+    Carrito(OrdenStrategy e) { this.estrategia = e; }
+    double total(double sub) { return estrategia.calcularTotal(sub); }
+}`,
+    options: ["Facade", "Builder", "Strategy", "Singleton"],
+    correct: 2
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "¿En qué situación es más apropiado aplicar el patrón <strong>Facade</strong>?",
+    options: [
+      "Cuando necesitas crear múltiples variantes de un objeto complejo sin repetir código.",
+      "Cuando tienes un subsistema complejo con muchas clases y quieres ofrecer una interfaz simplificada al cliente.",
+      "Cuando quieres que un algoritmo pueda variar independientemente del cliente que lo usa.",
+      "Cuando necesitas asegurar que cierta clase solo se instancie una vez."
+    ],
+    correct: 1
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "¿Cuál es la ventaja principal del patrón <strong>Builder</strong> frente a un constructor con múltiples parámetros?",
+    options: [
+      "Builder es más rápido en tiempo de ejecución que los constructores normales.",
+      "Builder permite construir el objeto paso a paso, con parámetros opcionales y legibilidad, evitando el 'telescoping constructor'.",
+      "Builder garantiza que la clase creada sea inmutable por diseño.",
+      "Builder elimina la necesidad de definir constructores en la clase."
+    ],
+    correct: 1
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "¿Qué patrón de diseño implementa el siguiente código?",
+    code: `class Reporte {
+    private String titulo, cuerpo, pie;
+    private Reporte() {}
+
+    static class Builder {
+        private Reporte r = new Reporte();
+        Builder titulo(String t)  { r.titulo = t; return this; }
+        Builder cuerpo(String c)  { r.cuerpo = c; return this; }
+        Builder pie(String p)     { r.pie = p;    return this; }
+        Reporte build()           { return r; }
+    }
+}
+// Uso: new Reporte.Builder().titulo("Informe").cuerpo("...").build();`,
+    options: ["Abstract Factory", "Singleton", "Builder", "Strategy"],
+    correct: 2
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "En el patrón <strong>Strategy</strong>, ¿qué rol cumple la clase <strong>Context</strong>?",
+    options: [
+      "Define la interfaz común de todos los algoritmos posibles.",
+      "Es el cliente que decide qué estrategia concreta se va a usar.",
+      "Mantiene una referencia a un objeto Strategy y delega en él la ejecución del algoritmo.",
+      "Implementa uno de los algoritmos concretos de la familia."
+    ],
+    correct: 2
+  },
+  {
+    section: "Patrones de Diseño",
+    sectionId: 4,
+    text: "Se está desarrollando una aplicación que debe soportar dos temas de interfaz: <em>Claro</em> y <em>Oscuro</em>. Cada tema define su propio <code>Botón</code>, <code>TextField</code> y <code>Ventana</code>. ¿Qué patrón es el más adecuado?",
+    options: [
+      "Singleton — para garantizar un único tema activo.",
+      "Factory Method — para crear cada componente en una subclase.",
+      "Abstract Factory — para crear familias de componentes UI compatibles por tema.",
+      "Facade — para simplificar la creación de la UI completa."
+    ],
+    correct: 2
+  }
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   ESTADO DE LA APLICACIÓN
+══════════════════════════════════════════════════════════════════ */
+const state = {
+  studentId: null,
+  studentName: null,
+  answers: new Array(QUESTIONS.length).fill(null),
+  timerInterval: null,
+  secondsLeft: DURATION_SECONDS,
+  submitted: false,
+  tabSwitches: 0,
+  examActive: false
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   UTILIDADES
+══════════════════════════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function updateAnsweredCount() {
+  const cnt = state.answers.filter(a => a !== null).length;
+  document.getElementById('cnt').textContent = cnt;
+  const pct = (cnt / QUESTIONS.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RENDER EXAMEN
+══════════════════════════════════════════════════════════════════ */
+function renderExam() {
+  const container = document.getElementById('exam-container');
+  container.innerHTML = '';
+
+  let currentSection = null;
+  let sectionEl = null;
+
+  QUESTIONS.forEach((q, qIdx) => {
+    // Section header
+    if (q.section !== currentSection) {
+      currentSection = q.section;
+
+      const secDiv = document.createElement('div');
+      secDiv.style.marginBottom = '.25rem';
+      if (sectionEl) container.appendChild(sectionEl);
+
+      sectionEl = document.createElement('div');
+      sectionEl.style.marginBottom = '1.5rem';
+
+      const header = document.createElement('div');
+      header.className = 'section-header';
+
+      const pill = document.createElement('span');
+      pill.className = 'section-pill';
+      pill.textContent = `Sección ${q.sectionId}`;
+
+      const title = document.createElement('span');
+      title.className = 'section-title';
+      title.textContent = q.section;
+
+      const pts = document.createElement('span');
+      pts.className = 'section-pts';
+      const count = QUESTIONS.filter(x => x.sectionId === q.sectionId).length;
+      pts.textContent = `${count} preg. · ${(count * 0.2).toFixed(1)} pts`;
+
+      header.appendChild(pill);
+      header.appendChild(title);
+      header.appendChild(pts);
+      sectionEl.appendChild(header);
+    }
+
+    // Question card
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `q-card-${qIdx}`;
+
+    const numBadge = document.createElement('div');
+    numBadge.className = 'q-number';
+    numBadge.textContent = `Pregunta ${qIdx + 1}`;
+
+    const qText = document.createElement('div');
+    qText.className = 'q-text';
+    qText.innerHTML = q.text;
+
+    card.appendChild(numBadge);
+    card.appendChild(qText);
+
+    if (q.code) {
+      const pre = document.createElement('pre');
+      pre.className = 'code-block';
+      pre.textContent = q.code;
+      card.appendChild(pre);
+    }
+
+    const ul = document.createElement('ul');
+    ul.className = 'options';
+
+    q.options.forEach((opt, oIdx) => {
+      const li = document.createElement('li');
+      li.id = `q${qIdx}-opt${oIdx}`;
+
+      const label = document.createElement('label');
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = `q${qIdx}`;
+      radio.value = oIdx;
+
+      radio.addEventListener('change', () => {
+        state.answers[qIdx] = oIdx;
+        ul.querySelectorAll('li').forEach(l => l.classList.remove('selected'));
+        li.classList.add('selected');
+        card.classList.add('answered');
+        updateAnsweredCount();
+      });
+
+      const span = document.createElement('span');
+      span.innerHTML = opt;
+
+      label.appendChild(radio);
+      label.appendChild(span);
+      li.appendChild(label);
+      ul.appendChild(li);
+    });
+
+    card.appendChild(ul);
+    sectionEl.appendChild(card);
+  });
+
+  if (sectionEl) container.appendChild(sectionEl);
+
+  // Bottom padding for fixed submit bar
+  const spacer = document.createElement('div');
+  spacer.style.height = '80px';
+  container.appendChild(spacer);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TIMER
+══════════════════════════════════════════════════════════════════ */
+function startTimer() {
+  const display = document.getElementById('timer-display');
+  state.timerInterval = setInterval(() => {
+    state.secondsLeft--;
+    display.textContent = formatTime(state.secondsLeft);
+
+    if (state.secondsLeft <= 300 && state.secondsLeft > 60) {
+      display.className = 'warn';
+    } else if (state.secondsLeft <= 60) {
+      display.className = 'danger';
+    }
+
+    if (state.secondsLeft <= 0) {
+      clearInterval(state.timerInterval);
+      submitExam(true);
+    }
+  }, 1000);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CALIFICACIÓN
+══════════════════════════════════════════════════════════════════ */
+function calcGrade() {
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    if (state.answers[i] === q.correct) correct++;
+  });
+  const raw = correct * 0.2;
+  return { correct, wrong: QUESTIONS.length - correct, grade: Math.min(5.0, parseFloat(raw.toFixed(2))) };
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MOSTRAR RESULTADOS
+══════════════════════════════════════════════════════════════════ */
+function showResults(result) {
+  clearInterval(state.timerInterval);
+  showScreen('screen-results');
+
+  // Ring
+  const ring = document.getElementById('score-ring');
+  ring.textContent = result.grade.toFixed(1);
+  ring.className = 'score-ring ' + (result.grade >= 4.0 ? 'great' : result.grade >= 3.0 ? 'pass' : 'fail');
+
+  // Title
+  document.getElementById('result-title').textContent =
+    result.grade >= 3.0 ? '¡Examen aprobado!' : 'Examen no aprobado';
+  document.getElementById('result-subtitle').textContent =
+    `${state.studentName} · Corte 1 y Corte 2`;
+
+  // Stats grid
+  const grid = document.getElementById('results-grid');
+  const tabCls = state.tabSwitches === 0 ? 'green' : state.tabSwitches <= 2 ? 'orange' : 'red';
+  const stats = [
+    { label: 'Nota final',        value: result.grade.toFixed(1) + ' / 5.0', cls: result.grade >= 3.0 ? 'green' : 'red' },
+    { label: 'Correctas',         value: result.correct,  cls: 'green' },
+    { label: 'Incorrectas',       value: result.wrong,    cls: 'red' },
+    { label: 'Porcentaje',        value: Math.round((result.correct / QUESTIONS.length) * 100) + '%', cls: 'blue' },
+    { label: 'Salidas de pestaña', value: state.tabSwitches === 0 ? '0 ✔' : `${state.tabSwitches} ⚠`, cls: tabCls }
+  ];
+  grid.innerHTML = stats.map(s =>
+    `<div class="results-stat">
+      <div class="label">${s.label}</div>
+      <div class="value ${s.cls}">${s.value}</div>
+    </div>`
+  ).join('');
+
+  // Review
+  const reviewList = document.getElementById('review-list');
+  reviewList.innerHTML = QUESTIONS.map((q, i) => {
+    const ok = state.answers[i] === q.correct;
+    const answered = state.answers[i] !== null ? q.options[state.answers[i]].replace(/<[^>]*>/g,'') : '(Sin responder)';
+    const correct  = q.options[q.correct].replace(/<[^>]*>/g,'');
+    return `<div class="review-item ${ok ? 'ok' : 'fail'}">
+      <span class="review-icon">${ok ? '✔' : '✘'}</span>
+      <div class="review-text">
+        <div class="q">P${i+1}. ${q.text.replace(/<[^>]*>/g,'').substring(0,90)}…</div>
+        <div class="ans">Tu respuesta: <em>${answered}</em>${!ok ? ` · Correcta: <strong>${correct}</strong>` : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Report to API
+  reportGrade(result.grade);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SUBMIT EXAMEN
+══════════════════════════════════════════════════════════════════ */
+function submitExam(timedOut = false) {
+  if (state.submitted) return;
+  state.submitted = true;
+  document.getElementById('submit-bar').style.display = 'none';
+
+  const unanswered = state.answers.filter(a => a === null).length;
+  if (timedOut && unanswered > 0) {
+    // Auto submit after time
+  }
+  const result = calcGrade();
+  showResults(result);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   REPORTE A LA API
+══════════════════════════════════════════════════════════════════ */
+async function reportGrade(grade) {
+  const statusEl = document.getElementById('api-status');
+  statusEl.className = 'sending';
+  statusEl.textContent = 'Reportando nota en los parciales pendientes…';
+
+  const results = await Promise.allSettled(
+    ACTIVITIES.map(act =>
+      fetch(API_SUBMIT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ studentId: state.studentId, activityId: act.id, score: grade })
+      }).then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return act.name;
+      })
+    )
+  );
+
+  const ok   = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+  const fail = results.filter(r => r.status === 'rejected');
+
+  if (fail.length === 0) {
+    statusEl.className = 'success';
+    statusEl.innerHTML =
+      `✔ Nota <strong>${grade.toFixed(1)}</strong> registrada exitosamente en:<br>` +
+      ok.map(n => `&nbsp;&nbsp;· ${n}`).join('<br>');
+  } else if (ok.length > 0) {
+    statusEl.className = 'error';
+    statusEl.innerHTML =
+      `⚠ Nota registrada parcialmente.<br>` +
+      `Éxito en: ${ok.join(', ')}<br>` +
+      `Error en: ${fail.map((_,i) => ACTIVITIES[results.indexOf(results.filter(r=>r.status==='rejected')[i])].name).join(', ')}<br><br>` +
+      `<strong>Nota: ${grade.toFixed(1)} / 5.0</strong> — reportar manualmente si es necesario.`;
+  } else {
+    const payloads = ACTIVITIES.map(act =>
+      JSON.stringify({ studentId: state.studentId, activityId: act.id, grade })
+    ).join('\n');
+    statusEl.className = 'error';
+    statusEl.innerHTML =
+      `⚠ No se pudo reportar la nota automáticamente.<br>
+       <small>Error: ${fail[0].reason?.message}</small><br><br>
+       <strong>Nota obtenida: ${grade.toFixed(1)} / 5.0</strong><br>
+       <small>Payloads para reporte manual:</small><br>
+       <code style="font-size:.78rem;word-break:break-all;white-space:pre-wrap">${payloads}</code>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   EVENT LISTENERS
+══════════════════════════════════════════════════════════════════ */
+document.getElementById('btn-start').addEventListener('click', () => {
+  const studentSel = document.getElementById('sel-student');
+
+  if (!studentSel.value) {
+    alert('Por favor selecciona tu nombre para continuar.');
+    return;
+  }
+
+  state.studentId   = studentSel.value;
+  state.studentName = studentSel.options[studentSel.selectedIndex].text;
+
+  document.querySelector('#app-header h1').textContent =
+    `${state.studentName.split(' ')[0]} · Examen de Recuperación`;
+
+  document.getElementById('timer-box').style.display  = 'flex';
+  document.getElementById('progress-bar-wrap').style.display = 'block';
+  document.getElementById('timer-display').textContent = formatTime(DURATION_SECONDS);
+
+  renderExam();
+  showScreen('screen-exam');
+  startTimer();
+  state.examActive = true;
+
+  // Badge de salidas de pestaña en el header
+  const badge = document.createElement('span');
+  badge.id = 'tab-badge';
+  badge.className = 'tab-switch-badge none';
+  badge.textContent = '✔ Sin salidas';
+  document.getElementById('timer-box').prepend(badge);
+});
+
+// Submit button → modal
+document.getElementById('btn-submit').addEventListener('click', () => {
+  const unanswered = state.answers.filter(a => a === null).length;
+  const msg = unanswered > 0
+    ? `Tienes <strong>${unanswered} pregunta(s) sin responder</strong>. ¿Deseas enviar de todas formas?`
+    : '¿Estás seguro/a de enviar el examen? No podrás cambiar tus respuestas.';
+  document.getElementById('modal-msg').innerHTML = msg;
+  document.getElementById('modal-overlay').classList.add('open');
+});
+
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+
+document.getElementById('modal-confirm').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+  submitExam();
+});
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   ANTI-TRAMPA
+══════════════════════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg, isWarn = false) {
+  const t = document.getElementById('cheat-toast');
+  t.textContent = msg;
+  t.classList.toggle('warn-color', isWarn);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Bloquear clic derecho
+document.addEventListener('contextmenu', e => {
+  if (!state.examActive) return;
+  e.preventDefault();
+  showToast('⛔ Clic derecho deshabilitado durante el examen.');
+});
+
+// Bloquear copiar / cortar / pegar
+['copy', 'cut', 'paste'].forEach(evt => {
+  document.addEventListener(evt, e => {
+    if (!state.examActive) return;
+    e.preventDefault();
+    showToast('⛔ Copiar/pegar deshabilitado durante el examen.');
+  });
+});
+
+// Bloquear atajos de teclado: Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+A
+document.addEventListener('keydown', e => {
+  if (!state.examActive) return;
+  if (e.ctrlKey && ['c','x','v','a'].includes(e.key.toLowerCase())) {
+    e.preventDefault();
+    showToast('⛔ Atajo de teclado deshabilitado durante el examen.');
+  }
+});
+
+// Detectar cambio de pestaña / minimizar ventana
+document.addEventListener('visibilitychange', () => {
+  if (!state.examActive || state.submitted) return;
+  if (document.hidden) {
+    state.tabSwitches++;
+    // Actualizar badge en el header si el examen ya empezó
+    const badge = document.getElementById('tab-badge');
+    if (badge) {
+      badge.textContent = `⚠ ${state.tabSwitches} salida(s) de pestaña`;
+      badge.className = 'tab-switch-badge ' + (state.tabSwitches >= 3 ? 'high' : 'low');
+    }
+  } else {
+    showToast(`⚠ Se registró que saliste de la pestaña (${state.tabSwitches} vez${state.tabSwitches > 1 ? 'ces' : ''}).`, true);
+  }
+});
+</script>
+</body>
+</html>

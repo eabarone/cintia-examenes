@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Programación III | Exámenes Virtuales</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0d0d1a;
+      --card:     rgba(255,255,255,0.06);
+      --border:   rgba(255,255,255,0.1);
+      --text:     #f0f0ff;
+      --muted:    rgba(255,255,255,0.45);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background-image:
+        radial-gradient(ellipse at top right,   rgba(6,182,212,.15)  0%, transparent 55%),
+        radial-gradient(ellipse at bottom left, rgba(124,58,237,.12) 0%, transparent 55%);
+      animation: fadeUp .35s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 1.2rem; left: 1.2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Poppins', sans-serif;
+      font-size: .85rem;
+      padding: .45rem .9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color .2s, border-color .2s;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .back-btn:hover { color: var(--text); border-color: rgba(255,255,255,.25); }
+
+    .logo {
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.3rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #67e8f9, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin-bottom: .4rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: .92rem;
+      text-align: center;
+      margin-bottom: 2.8rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      width: 100%;
+      max-width: 740px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.2rem 1.8rem;
+      text-decoration: none;
+      color: var(--text);
+      text-align: center;
+      transition: transform .25s, border-color .25s;
+      display: block;
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      border-radius: 20px;
+      transition: opacity .3s;
+    }
+    .card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,.22); }
+    .card:hover::after { opacity: 1; }
+
+    .card.recuperacion::after { background: linear-gradient(135deg, rgba(239,68,68,.22), rgba(245,158,11,.18)); }
+    .card.placeholder::after  { background: transparent; }
+    .card.placeholder { opacity: .35; cursor: default; pointer-events: none; }
+
+    .card .icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: .85rem;
+      position: relative;
+      z-index: 1;
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+      margin-bottom: .35rem;
+    }
+    .card p {
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.5;
+      position: relative;
+      z-index: 1;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: .9rem;
+      padding: .25rem .9rem;
+      border-radius: 100px;
+      font-size: .75rem;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+    .card.recuperacion .badge { background: rgba(239,68,68,.25); color: #fca5a5; }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      margin-top: .7rem;
+      font-size: .75rem;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    footer { margin-top: 3rem; color: var(--muted); font-size: .75rem; }
+  </style>
+</head>
+<body>
+
+  <a class="back-btn" href="../">← Sistemas</a>
+
+  <div class="logo">☕ Programación III · Java</div>
+  <h1>Selecciona la actividad</h1>
+  <p class="subtitle">POO · Herencia · Interfaces · Lambdas · Patrones de Diseño</p>
+
+  <div class="grid">
+
+    <a class="card recuperacion" href="examen-recuperacion/">
+      <span class="icon">📋</span>
+      <h2>Examen de Recuperación</h2>
+      <p>Selección múltiple con código Java</p>
+    </a>
+
+  </div>
+
+  <footer>eNotes · Integración externa — 2026</footer>
+
+</body>
+</html>
