@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recovery Exam – English II</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #5b21b6;
+      --primary-l: #7c3aed;
+      --accent:    #2ecc71;
+      --danger:    #e74c3c;
+      --warn:      #f39c12;
+      --blue:      #3498db;
+      --bg:        #f4f1fb;
+      --card:      #ffffff;
+      --text:      #1a202c;
+      --muted:     #718096;
+      --border:    #e2e8f0;
+      --radius:    10px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ───── HEADER ───── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    header h1 { font-size: 1rem; font-weight: 700; letter-spacing: .3px; }
+    #timer-box { display: flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .95rem; }
+    #timer-box svg { flex-shrink: 0; }
+    #timer-display { min-width: 60px; text-align: right; }
+    #timer-display.warn   { color: var(--warn); }
+    #timer-display.danger { color: #ffb4a8; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ───── PROGRESS BAR ───── */
+    #progress-bar-wrap { background: #c9bbe6; height: 5px; position: sticky; top: 56px; z-index: 99; }
+    #progress-bar { height: 100%; background: var(--accent); transition: width .4s ease; width: 0%; }
+
+    /* ───── LAYOUT ───── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .container { max-width: 860px; margin: 0 auto; padding: 2rem 1rem 6rem; }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ───── START SCREEN ───── */
+    #screen-start .hero { text-align: center; padding: 2.5rem 1rem 1.5rem; }
+    .badge-course {
+      display: inline-block; background: var(--primary); color: #fff;
+      font-size: .75rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: .3rem .9rem; border-radius: 20px; margin-bottom: 1rem;
+    }
+    #screen-start h2 { font-size: 1.9rem; color: var(--primary); margin-bottom: .5rem; }
+    #screen-start p.subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+    .info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .info-item { border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; }
+    .info-item .label { font-size: .7rem; text-transform: uppercase; color: var(--muted); letter-spacing: .8px; }
+    .info-item .value { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-top: .2rem; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: .4rem; color: var(--primary); }
+    .form-group select {
+      width: 100%; padding: .65rem .85rem; border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: .95rem; font-family: inherit; color: var(--text);
+      background: #fff; transition: border-color .2s;
+    }
+    .form-group select:focus { outline: none; border-color: var(--primary); }
+
+    .rules ul { list-style: none; padding: 0; }
+    .rules ul li { padding: .45rem 0; border-bottom: 1px solid var(--border); display: flex; gap: .6rem; font-size: .9rem; }
+    .rules ul li:last-child { border-bottom: none; }
+    .rules ul li::before { content: "✦"; color: var(--primary); font-size: .7rem; margin-top: .25rem; flex-shrink: 0; }
+
+    /* ───── BUTTONS ───── */
+    .btn {
+      display: inline-block; padding: .75rem 2rem; border-radius: 8px;
+      font-weight: 700; font-size: 1rem; cursor: pointer; border: none;
+      transition: opacity .2s, transform .1s; font-family: inherit;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { opacity: .88; }
+    .btn-accent  { background: var(--accent);  color: #fff; }
+    .btn-accent:hover:not(:disabled) { opacity: .88; }
+    .btn-danger  { background: var(--danger);  color: #fff; }
+    .btn-block   { width: 100%; text-align: center; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+
+    /* ───── SECTION ───── */
+    .section-header { display: flex; align-items: center; gap: .75rem; margin-bottom: .4rem; flex-wrap: wrap; }
+    .section-pill {
+      background: var(--primary); color: #fff; font-size: .72rem; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase; padding: .25rem .75rem; border-radius: 20px; white-space: nowrap;
+    }
+    .section-title { font-size: 1.15rem; font-weight: 700; color: var(--primary); }
+    .section-pts   { font-size: .82rem; color: var(--muted); margin-left: auto; }
+    .section-instr {
+      font-size: .88rem; color: #6b5b95; background: #f3effb; border: 1px solid #e3d9f5;
+      border-radius: 8px; padding: .6rem .85rem; margin-bottom: 1.1rem; display: flex; gap: .5rem; align-items: flex-start;
+    }
+    .section-instr svg { flex-shrink: 0; margin-top: 2px; }
+
+    /* ───── QUESTION CARD ───── */
+    .question-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem; margin-bottom: 1rem;
+    }
+    .q-number {
+      display: inline-block; background: var(--primary); color: #fff; font-size: .75rem;
+      font-weight: 700; padding: .15rem .55rem; border-radius: 4px; margin-bottom: .75rem;
+    }
+    .q-text { font-size: .97rem; margin-bottom: 1rem; line-height: 1.7; }
+
+    /* ───── MCQ OPTIONS ───── */
+    .options { list-style: none; display: flex; flex-direction: column; gap: .55rem; }
+    .options li label {
+      display: flex; align-items: flex-start; gap: .65rem; padding: .7rem .9rem;
+      border: 1.5px solid var(--border); border-radius: 7px; cursor: pointer;
+      transition: background .15s, border-color .15s; font-size: .93rem;
+    }
+    .options li label:hover { background: #faf8ff; border-color: #b9a4e0; }
+    .options li input[type=radio] { margin-top: .2rem; accent-color: var(--primary); flex-shrink: 0; }
+    .options li.selected label { background: #f3effb; border-color: var(--primary); }
+    .options li.correct-answer label { background: #f0fff4; border-color: var(--accent); font-weight: 600; }
+    .options li.wrong-answer label   { background: #fff5f5; border-color: var(--danger); }
+
+    /* ───── FILL IN THE BLANK ───── */
+    .fill-row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding: .7rem 0; border-bottom: 1px dashed var(--border); font-size: .96rem; }
+    .fill-row:last-child { border-bottom: none; }
+    .fill-row .hint { color: var(--muted); font-size: .82rem; font-style: italic; }
+    .fill-input {
+      border: none; border-bottom: 2px solid var(--primary-l); background: #faf8ff;
+      font-family: inherit; font-size: .95rem; padding: .25rem .5rem; min-width: 120px;
+      color: var(--primary); font-weight: 600; text-align: center; border-radius: 4px 4px 0 0;
+    }
+    .fill-input:focus { outline: none; border-bottom-color: var(--primary); background: #f3effb; }
+    .fill-input.ok  { border-bottom-color: var(--accent); color: #276749; background: #f0fff4; }
+    .fill-input.bad { border-bottom-color: var(--danger); color: #9b2335; background: #fff5f5; }
+    .fill-correct { font-size: .82rem; color: var(--accent); font-weight: 700; margin-left: .3rem; }
+
+    /* ───── DROPDOWN COMPLETE ───── */
+    .dd-row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding: .7rem 0; border-bottom: 1px dashed var(--border); font-size: .96rem; }
+    .dd-row:last-child { border-bottom: none; }
+    .dd-select {
+      border: 1.5px solid var(--primary-l); border-radius: 6px; background: #faf8ff;
+      font-family: inherit; font-size: .9rem; padding: .3rem .5rem; color: var(--primary); font-weight: 600;
+    }
+    .dd-select:focus { outline: none; border-color: var(--primary); }
+    .dd-select.ok  { border-color: var(--accent); background: #f0fff4; color: #276749; }
+    .dd-select.bad { border-color: var(--danger); background: #fff5f5; color: #9b2335; }
+
+    /* ───── MATCHING ───── */
+    .match-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 560px) { .match-wrap { grid-template-columns: 1fr; } }
+    .match-col-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); font-weight: 700; margin-bottom: .5rem; }
+    .match-item {
+      display: flex; align-items: center; gap: .6rem; padding: .7rem .9rem; margin-bottom: .55rem;
+      border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; font-size: .9rem;
+      transition: background .15s, border-color .15s; background: #fff; user-select: none;
+    }
+    .match-item:hover { background: #faf8ff; border-color: #b9a4e0; }
+    .match-item.selected { border-color: var(--primary); background: #f3effb; box-shadow: 0 0 0 2px rgba(124,58,237,.18); }
+    .match-item.paired { border-color: var(--primary-l); }
+    .match-badge {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: none;
+      align-items: center; justify-content: center; font-size: .72rem; font-weight: 800; color: #fff;
+    }
+    .match-item.paired .match-badge { display: flex; }
+    .match-item.correct-pair { border-color: var(--accent); background: #f0fff4; }
+    .match-item.wrong-pair   { border-color: var(--danger); background: #fff5f5; }
+
+    /* ───── CATEGORIZE (DRAG & DROP) ───── */
+    .cat-pool {
+      display: flex; flex-wrap: wrap; gap: .5rem; padding: .9rem; min-height: 56px;
+      background: #faf8ff; border: 1.5px dashed #c9bbe6; border-radius: 8px; margin-bottom: 1rem;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: .35rem; padding: .45rem .8rem;
+      background: var(--primary); color: #fff; border-radius: 20px; font-size: .85rem;
+      font-weight: 600; cursor: grab; user-select: none; transition: transform .1s, opacity .15s;
+      touch-action: none;
+    }
+    .chip:active { cursor: grabbing; }
+    .chip.selected { outline: 3px solid #f1c40f; }
+    .chip.dragging { opacity: .4; }
+    .chip.ok  { background: var(--accent); }
+    .chip.bad { background: var(--danger); }
+    .cat-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 560px) { .cat-zones { grid-template-columns: 1fr; } }
+    .cat-zone {
+      border: 1.5px solid var(--border); border-radius: 8px; padding: .8rem; min-height: 110px;
+      transition: background .15s, border-color .15s;
+    }
+    .cat-zone.dragover { background: #f3effb; border-color: var(--primary); }
+    .cat-zone .cat-zone-title {
+      font-size: .8rem; font-weight: 700; color: var(--primary); margin-bottom: .6rem;
+      text-align: center; padding-bottom: .4rem; border-bottom: 1px solid var(--border);
+    }
+    .cat-drop { display: flex; flex-wrap: wrap; gap: .5rem; min-height: 40px; align-content: flex-start; }
+
+    /* ───── FLOATING SUBMIT ───── */
+    #submit-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+      border-top: 1px solid var(--border); padding: .9rem 1.5rem; display: flex;
+      align-items: center; justify-content: space-between; z-index: 200; box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+    }
+    #answered-count { font-size: .88rem; color: var(--muted); }
+    #answered-count span { font-weight: 700; color: var(--primary); }
+
+    /* ───── RESULTS ───── */
+    #screen-results .hero { text-align: center; padding: 2rem 1rem 1rem; }
+    .score-ring {
+      display: inline-flex; align-items: center; justify-content: center; width: 140px; height: 140px;
+      border-radius: 50%; font-size: 2.5rem; font-weight: 900; border: 6px solid var(--accent); margin: 1rem auto 1.5rem;
+    }
+    .score-ring.fail  { border-color: var(--danger); color: var(--danger); }
+    .score-ring.pass  { border-color: var(--accent); color: var(--accent); }
+    .score-ring.great { border-color: var(--blue);   color: var(--blue); }
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .results-stat { border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; }
+    .results-stat .label { font-size: .7rem; text-transform: uppercase; color: var(--muted); letter-spacing: .8px; }
+    .results-stat .value { font-size: 1.4rem; font-weight: 800; margin-top: .25rem; }
+    .results-stat .value.green  { color: var(--accent); }
+    .results-stat .value.red    { color: var(--danger); }
+    .results-stat .value.blue   { color: var(--blue); }
+    .results-stat .value.orange { color: var(--warn); }
+
+    #api-status { padding: 1rem; border-radius: 8px; font-size: .9rem; margin-bottom: 1rem; text-align: center; }
+    #api-status.sending { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+    #api-status.success { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+    #api-status.error   { background: #fff5f5; color: #9b2335; border: 1px solid #fc8181; }
+
+    #review-section h3 { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; }
+    .review-item { padding: .9rem 1rem; border-radius: 8px; margin-bottom: .6rem; font-size: .88rem; display: flex; gap: .75rem; align-items: flex-start; }
+    .review-item.ok   { background: #f0fff4; border-left: 3px solid var(--accent); }
+    .review-item.fail { background: #fff5f5; border-left: 3px solid var(--danger); }
+    .review-icon { font-size: 1rem; flex-shrink: 0; }
+    .review-text .q { font-weight: 600; color: var(--text); }
+    .review-text .ans { color: var(--muted); font-size: .83rem; margin-top: .2rem; }
+
+    /* ───── MODAL ───── */
+    #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 500; align-items: center; justify-content: center; }
+    #modal-overlay.open { display: flex; }
+    #modal { background: #fff; border-radius: var(--radius); padding: 2rem; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    #modal h3 { font-size: 1.1rem; margin-bottom: .75rem; color: var(--primary); }
+    #modal p  { font-size: .93rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+    .modal-buttons { display: flex; gap: .75rem; justify-content: flex-end; }
+
+    .notice-info {
+      display: flex; gap: .65rem; align-items: flex-start; background: #f3effb; border: 1px solid #e3d9f5;
+      border-radius: 8px; padding: .85rem 1rem; font-size: .88rem; color: #5b21b6; line-height: 1.55;
+    }
+
+    /* ───── ANTI-TRAMPA ───── */
+    #cheat-toast {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: #2d3748; color: #fff; padding: .7rem 1.4rem; border-radius: 8px;
+      font-size: .88rem; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,.35); z-index: 999;
+      opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; white-space: nowrap;
+    }
+    #cheat-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #cheat-toast.warn-color { background: #c53030; }
+    .tab-switch-badge { display: inline-block; padding: .15rem .55rem; border-radius: 20px; font-size: .75rem; font-weight: 700; margin-left: .4rem; vertical-align: middle; }
+    .tab-switch-badge.none { background: #f0fff4; color: #276749; }
+    .tab-switch-badge.low  { background: #fffbeb; color: #b7791f; }
+    .tab-switch-badge.high { background: #fff5f5; color: #9b2335; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* drag clone follows pointer */
+    #drag-ghost {
+      position: fixed; pointer-events: none; z-index: 1000; opacity: .9;
+      transform: translate(-50%, -50%); display: none;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: .85rem; }
+      .card { padding: 1.25rem; }
+      #screen-start h2 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="app-header">
+  <h1>English II — Recovery Exam</h1>
+  <div id="timer-box" style="display:none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span id="timer-display">45:00</span>
+  </div>
+</header>
+<div id="progress-bar-wrap" style="display:none"><div id="progress-bar"></div></div>
+
+<!-- ═══════════ SCREEN: START ═══════════ -->
+<section id="screen-start" class="screen active">
+  <div class="container" style="max-width:680px">
+
+    <div class="hero">
+      <div class="badge-course">Técnico Profesional · English II</div>
+      <h2>Recovery Exam</h2>
+      <p class="subtitle">Tech Jobs · Comparatives &amp; Superlatives · Tech Trends &nbsp;·&nbsp; 45 minutes</p>
+
+      <div class="info-grid">
+        <div class="info-item"><div class="label">Time</div><div class="value">45 min</div></div>
+        <div class="info-item"><div class="label">Activities</div><div class="value">6</div></div>
+        <div class="info-item"><div class="label">Total score</div><div class="value">5.0 pts</div></div>
+        <div class="info-item"><div class="label">Pass</div><div class="value">≥ 3.0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:1rem;color:var(--primary)">Identification</h3>
+
+      <div id="st-loading" style="display:flex;align-items:center;gap:.7rem;color:var(--muted);font-size:.9rem;padding:.5rem 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;flex-shrink:0"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Loading students...
+      </div>
+
+      <div id="st-error" style="display:none;background:#fff5f5;border:1px solid #fc8181;border-radius:8px;padding:.85rem 1rem;font-size:.88rem;color:#9b2335">
+        <strong>Could not load the student list.</strong>
+        <span id="st-error-msg"></span>
+        <br><button onclick="loadStudents()" style="margin-top:.6rem;background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:.4rem .9rem;cursor:pointer;font-size:.83rem">Retry</button>
+      </div>
+
+      <div id="st-empty" style="display:none;background:#f0fff4;border:1px solid #9ae6b4;border-radius:8px;padding:.85rem 1rem;font-size:.88rem;color:#276749">
+        ✔ All students already have a grade registered for this activity.
+      </div>
+
+      <div id="st-ready" style="display:none">
+        <div class="form-group">
+          <label for="sel-student">Student</label>
+          <select id="sel-student">
+            <option value="">— Select your name —</option>
+          </select>
+        </div>
+        <div class="notice-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="notice-activities">Your grade will be registered automatically in the pending activity.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card rules">
+      <h3 style="margin-bottom:.85rem;color:var(--primary)">Instructions</h3>
+      <ul>
+        <li>The exam has <strong>6 interactive activities</strong>: multiple choice, matching, drag &amp; drop, fill in the blanks and complete the sentence.</li>
+        <li>The total score is <strong>5.0 points</strong>, distributed across all the items. There are no negative points.</li>
+        <li>You have <strong>45 minutes</strong> from the moment you start. The timer does not stop.</li>
+        <li>Once you submit the exam <strong>you cannot change your answers</strong>.</li>
+        <li>When you finish, your grade is reported automatically to the grading system.</li>
+        <li>Topics: Tech Jobs vocabulary · Comparatives and Superlatives · Tech Trends and Comparisons.</li>
+      </ul>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="btn-start">Start Exam</button>
+  </div>
+</section>
+
+<!-- ═══════════ SCREEN: EXAM ═══════════ -->
+<section id="screen-exam" class="screen">
+  <div class="container" id="exam-container"></div>
+  <div id="submit-bar">
+    <div id="answered-count">Completed: <span id="cnt">0</span> / <span id="cnt-total">0</span></div>
+    <button class="btn btn-accent" id="btn-submit">Submit exam</button>
+  </div>
+</section>
+
+<!-- ═══════════ SCREEN: RESULTS ═══════════ -->
+<section id="screen-results" class="screen">
+  <div class="container" style="max-width:740px">
+    <div class="hero">
+      <div id="score-ring" class="score-ring"></div>
+      <h2 id="result-title" style="color:var(--primary);margin-bottom:.3rem"></h2>
+      <p id="result-subtitle" style="color:var(--muted)"></p>
+    </div>
+
+    <div class="card">
+      <div class="results-grid" id="results-grid"></div>
+      <div id="api-status" class="sending">Reporting grade to the system…</div>
+    </div>
+
+    <div class="card" id="review-section">
+      <h3>Activity review</h3>
+      <div id="review-list"></div>
+    </div>
+
+    <a href="../../../" class="btn btn-primary btn-block" style="text-decoration:none;display:block;text-align:center">
+      Close exam
+    </a>
+  </div>
+</section>
+
+<!-- TOAST ANTI-TRAMPA -->
+<div id="cheat-toast"></div>
+<div id="drag-ghost"></div>
+
+<!-- MODAL CONFIRM -->
+<div id="modal-overlay">
+  <div id="modal">
+    <h3>Submit exam?</h3>
+    <p id="modal-msg">Once submitted you will not be able to change your answers. Are you sure you want to continue?</p>
+    <div class="modal-buttons">
+      <button class="btn btn-outline" id="modal-cancel">Cancel</button>
+      <button class="btn btn-danger"  id="modal-confirm">Yes, submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   CONFIGURACIÓN — integración e-notes
+══════════════════════════════════════════════════════════════════ */
+const API_TOKEN    = "be3b3cc9e6c291a084f8f5adc93f7a37a78911e3bfcf3b97";
+const API_BASE     = "https://enotes.ecodestudio.dev/api/integrations/" + API_TOKEN;
+const API_SUBMIT   = API_BASE + "/submit";
+const API_STUDENTS = API_BASE + "/students";
+const DURATION_SECONDS = 45 * 60;
+
+/* ══════════════════════════════════════════════════════════════════
+   BANCO DE ACTIVIDADES
+══════════════════════════════════════════════════════════════════ */
+const EXERCISES = [
+
+  /* ─── 1. TECH JOBS — MULTIPLE CHOICE ─── */
+  {
+    type: "mcq",
+    sectionId: 1,
+    section: "Tech Jobs — Vocabulary",
+    instr: "Read each definition and choose the correct tech job.",
+    questions: [
+      { text: "A <strong>______</strong> writes, tests and maintains the code that builds applications and programs.",
+        options: ["Software Developer", "Graphic Designer", "Data Entry Clerk", "Project Manager"], correct: 0 },
+      { text: "A <strong>______</strong> protects an organization's systems and networks from cyber attacks and threats.",
+        options: ["Web Designer", "Cybersecurity Analyst", "Sales Representative", "Content Writer"], correct: 1 },
+      { text: "A <strong>______</strong> collects, cleans and interprets large amounts of information to find useful insights.",
+        options: ["Network Cabler", "Help Desk Agent", "Data Analyst", "Hardware Seller"], correct: 2 },
+      { text: "A <strong>______</strong> helps users by solving everyday hardware and software problems.",
+        options: ["Database Architect", "Game Producer", "Marketing Lead", "IT Support Technician"], correct: 3 },
+      { text: "A <strong>______</strong> designs how easy and pleasant a product is to use for the final user.",
+        options: ["UX/UI Designer", "Accountant", "Server Installer", "Cloud Salesman"], correct: 0 },
+    ]
+  },
+
+  /* ─── 2. MATCHING — JOB ↔ TASK ─── */
+  {
+    type: "match",
+    sectionId: 2,
+    section: "Tech Jobs — Match the job with its task",
+    instr: "Click a job on the left, then click its correct task on the right to connect them.",
+    left: [
+      { id: "l0", text: "Network Administrator" },
+      { id: "l1", text: "Database Administrator" },
+      { id: "l2", text: "QA Tester" },
+      { id: "l3", text: "Front-End Developer" },
+      { id: "l4", text: "Project Manager" },
+    ],
+    // right is displayed in this (scrambled) order
+    right: [
+      { id: "r2", text: "Checks software to find bugs and errors before release." },
+      { id: "r4", text: "Plans, organizes and leads a tech project to completion." },
+      { id: "r0", text: "Keeps computer networks and servers running and connected." },
+      { id: "r3", text: "Builds the visual part of a website that users see and click." },
+      { id: "r1", text: "Stores, organizes and secures the company's data." },
+    ],
+    // correct mapping leftId → rightId
+    answer: { l0: "r0", l1: "r1", l2: "r2", l3: "r3", l4: "r4" }
+  },
+
+  /* ─── 3. CATEGORIZE — DRAG & DROP ─── */
+  {
+    type: "categorize",
+    sectionId: 3,
+    section: "Tech Jobs — Drag &amp; Drop",
+    instr: "Drag each word to the correct box. On a phone, tap the word and then tap the box.",
+    categories: [
+      { id: "people", label: "👤 People (Jobs)" },
+      { id: "tools",  label: "🛠️ Tools &amp; Technologies" },
+    ],
+    items: [
+      { word: "Developer",     cat: "people" },
+      { word: "Python",        cat: "tools"  },
+      { word: "Analyst",       cat: "people" },
+      { word: "Firewall",      cat: "tools"  },
+      { word: "Engineer",      cat: "people" },
+      { word: "Database",      cat: "tools"  },
+      { word: "Administrator", cat: "people" },
+      { word: "Server",        cat: "tools"  },
+    ]
+  },
+
+  /* ─── 4. COMPARATIVES & SUPERLATIVES — FILL IN ─── */
+  {
+    type: "fill",
+    sectionId: 4,
+    section: "Comparatives &amp; Superlatives — Fill in the blank",
+    instr: "Write the correct comparative or superlative form of the adjective in brackets.",
+    items: [
+      { before: "Fiber internet is", hint: "(fast)", after: "than ADSL.", answers: ["faster"] },
+      { before: "Python is one of the", hint: "(easy)", after: "programming languages to learn.", answers: ["easiest"] },
+      { before: "This laptop is", hint: "(expensive)", after: "than that one.", answers: ["more expensive"] },
+      { before: "The new phone has", hint: "(good)", after: "battery life than the old one.", answers: ["better"] },
+      { before: "5G is the", hint: "(modern)", after: "mobile network available today.", answers: ["most modern"] },
+      { before: "A desktop computer is usually", hint: "(powerful)", after: "than a tablet.", answers: ["more powerful"] },
+    ]
+  },
+
+  /* ─── 5. TECH TRENDS — COMPLETE THE SENTENCE (DROPDOWN) ─── */
+  {
+    type: "dropdown",
+    sectionId: 5,
+    section: "Tech Trends — Complete the sentence",
+    instr: "Choose the correct option to complete each sentence about technology trends.",
+    items: [
+      { before: "Artificial Intelligence is becoming", options: ["more", "most", "much"], correct: "more", after: "important than ever." },
+      { before: "An SSD is much", options: ["fast", "faster", "fastest"], correct: "faster", after: "than a traditional hard drive." },
+      { before: "Cloud storage is one of the", options: ["more", "most", "as"], correct: "most", after: "convenient ways to save files." },
+      { before: "Electric cars are", options: ["more", "the most", "as"], correct: "more", after: "eco-friendly than gasoline cars." },
+      { before: "This is", options: ["the best", "better", "good"], correct: "the best", after: "smartphone I have ever used." },
+    ]
+  },
+
+  /* ─── 6. TECH TRENDS — READING COMPREHENSION (MCQ) ─── */
+  {
+    type: "reading",
+    sectionId: 6,
+    section: "Tech Trends — Reading &amp; Comparisons",
+    instr: "Read the short text and answer the questions.",
+    passage: "Technology is changing faster than ever. Today, Artificial Intelligence (AI) is one of the most popular trends in the tech world. Many companies say that AI tools are more efficient than humans for repetitive tasks, but humans are still better at creative work. At the same time, cloud computing is growing quickly because it is cheaper and more flexible than buying expensive local servers. Experts agree that the most important skill for the future is the ability to learn new tools fast.",
+    questions: [
+      { text: "According to the text, technology is changing…",
+        options: ["slower than before", "faster than ever", "as slow as always", "the slowest of all"], correct: 1 },
+      { text: "Why is cloud computing growing quickly?",
+        options: ["Because it is more expensive than local servers", "Because it is cheaper and more flexible than local servers", "Because humans are better than AI", "Because it is the slowest option"], correct: 1 },
+      { text: "What is the most important skill for the future, according to the experts?",
+        options: ["Buying expensive servers", "Doing repetitive tasks", "Learning new tools fast", "Avoiding Artificial Intelligence"], correct: 2 },
+    ]
+  },
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════════════════════════════ */
+const state = {
+  studentId: null,
+  studentName: null,
+  pendingActivities: [],
+  responses: {},          // por ejercicio
+  timerInterval: null,
+  secondsLeft: DURATION_SECONDS,
+  submitted: false,
+  tabSwitches: 0,
+  examActive: false,
+};
+
+// Inicializa estructuras de respuesta por ejercicio
+EXERCISES.forEach((ex, i) => {
+  if (ex.type === "mcq" || ex.type === "reading") state.responses[i] = new Array(ex.questions.length).fill(null);
+  if (ex.type === "match")      state.responses[i] = {};                // leftId -> rightId
+  if (ex.type === "categorize") state.responses[i] = {};               // word -> catId | 'pool'
+  if (ex.type === "fill")       state.responses[i] = new Array(ex.items.length).fill("");
+  if (ex.type === "dropdown")   state.responses[i] = new Array(ex.items.length).fill("");
+});
+
+/* Total de "items" puntuables (para barra de progreso y conteo) */
+function exItemCount(ex) {
+  if (ex.type === "mcq" || ex.type === "reading") return ex.questions.length;
+  if (ex.type === "match")      return ex.left.length;
+  if (ex.type === "categorize") return ex.items.length;
+  if (ex.type === "fill")       return ex.items.length;
+  if (ex.type === "dropdown")   return ex.items.length;
+  return 0;
+}
+const TOTAL_ITEMS = EXERCISES.reduce((a, ex) => a + exItemCount(ex), 0);
+
+/* ══════════════════════════════════════════════════════════════════
+   CARGA DINÁMICA DE ESTUDIANTES
+══════════════════════════════════════════════════════════════════ */
+async function loadStudents() {
+  document.getElementById('st-loading').style.display = 'flex';
+  document.getElementById('st-error').style.display   = 'none';
+  document.getElementById('st-empty').style.display   = 'none';
+  document.getElementById('st-ready').style.display   = 'none';
+  document.getElementById('btn-start').disabled       = true;
+
+  try {
+    const res  = await fetch(API_STUDENTS);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const studentMap = new Map();
+    for (const act of data.activities ?? []) {
+      for (const s of act.students ?? []) {
+        if (!studentMap.has(s.id)) studentMap.set(s.id, { name: s.name, activities: [] });
+        studentMap.get(s.id).activities.push({ id: act.id, name: act.name });
+      }
+    }
+
+    document.getElementById('st-loading').style.display = 'none';
+
+    if (studentMap.size === 0) {
+      document.getElementById('st-empty').style.display = 'block';
+      return;
+    }
+
+    const sel = document.getElementById('sel-student');
+    sel.innerHTML = '<option value="">— Select your name —</option>';
+    studentMap.forEach((val, id) => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = val.name;
+      opt.dataset.activities = JSON.stringify(val.activities);
+      sel.appendChild(opt);
+    });
+
+    document.getElementById('st-ready').style.display = 'block';
+    document.getElementById('btn-start').disabled      = false;
+
+  } catch (err) {
+    document.getElementById('st-loading').style.display = 'none';
+    document.getElementById('st-error').style.display   = 'block';
+    document.getElementById('st-error-msg').textContent = ` — ${err.message}`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadStudents();
+  document.getElementById('sel-student').addEventListener('change', function () {
+    const opt = this.options[this.selectedIndex];
+    if (!opt.dataset.activities) return;
+    const acts = JSON.parse(opt.dataset.activities);
+    const names = acts.map(a => `<strong>${a.name}</strong>`).join(' & ');
+    document.getElementById('notice-activities').innerHTML =
+      `Your grade will be registered automatically in: ${names}.`;
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   UTILIDADES
+══════════════════════════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function formatTime(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function norm(s) { return String(s).trim().toLowerCase().replace(/\s+/g, ' '); }
+
+const PAIR_COLORS = ['#7c3aed','#e67e22','#16a085','#2980b9','#c0392b','#8e44ad','#27ae60'];
+
+/* ══════════════════════════════════════════════════════════════════
+   PROGRESO (cuántos items tienen respuesta)
+══════════════════════════════════════════════════════════════════ */
+function answeredItemCount() {
+  let n = 0;
+  EXERCISES.forEach((ex, i) => {
+    const r = state.responses[i];
+    if (ex.type === "mcq" || ex.type === "reading") n += r.filter(x => x !== null).length;
+    if (ex.type === "match")      n += Object.keys(r).length;
+    if (ex.type === "categorize") n += Object.values(r).filter(c => c && c !== 'pool').length;
+    if (ex.type === "fill")       n += r.filter(x => norm(x) !== "").length;
+    if (ex.type === "dropdown")   n += r.filter(x => x !== "").length;
+  });
+  return n;
+}
+function updateProgress() {
+  const n = answeredItemCount();
+  document.getElementById('cnt').textContent = n;
+  document.getElementById('progress-bar').style.width = (n / TOTAL_ITEMS * 100) + '%';
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RENDER EXAMEN
+══════════════════════════════════════════════════════════════════ */
+function renderExam() {
+  const container = document.getElementById('exam-container');
+  container.innerHTML = '';
+  document.getElementById('cnt-total').textContent = TOTAL_ITEMS;
+
+  EXERCISES.forEach((ex, i) => {
+    const block = document.createElement('div');
+    block.style.marginBottom = '1.8rem';
+
+    // Section header
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `
+      <span class="section-pill">Activity ${ex.sectionId}</span>
+      <span class="section-title">${ex.section}</span>
+      <span class="section-pts">${exItemCount(ex)} items</span>`;
+    block.appendChild(header);
+
+    const instr = document.createElement('div');
+    instr.className = 'section-instr';
+    instr.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>${ex.instr}</span>`;
+    block.appendChild(instr);
+
+    const body = document.createElement('div');
+    body.className = 'card';
+    if (ex.type === "mcq")        renderMCQ(ex, i, body);
+    if (ex.type === "reading")    renderReading(ex, i, body);
+    if (ex.type === "match")      renderMatch(ex, i, body);
+    if (ex.type === "categorize") renderCategorize(ex, i, body);
+    if (ex.type === "fill")       renderFill(ex, i, body);
+    if (ex.type === "dropdown")   renderDropdown(ex, i, body);
+    block.appendChild(body);
+
+    container.appendChild(block);
+  });
+
+  const spacer = document.createElement('div');
+  spacer.style.height = '40px';
+  container.appendChild(spacer);
+}
+
+/* ── MCQ ── */
+function renderMCQ(ex, exi, root) {
+  ex.questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.innerHTML = `<div class="q-number">Q${qi + 1}</div><div class="q-text">${q.text}</div>`;
+    const ul = document.createElement('ul');
+    ul.className = 'options';
+    q.options.forEach((opt, oi) => {
+      const li = document.createElement('li');
+      const lbl = document.createElement('label');
+      const radio = document.createElement('input');
+      radio.type = 'radio'; radio.name = `ex${exi}-q${qi}`; radio.value = oi;
+      radio.addEventListener('change', () => {
+        state.responses[exi][qi] = oi;
+        ul.querySelectorAll('li').forEach(l => l.classList.remove('selected'));
+        li.classList.add('selected');
+        updateProgress();
+      });
+      const span = document.createElement('span'); span.innerHTML = opt;
+      lbl.appendChild(radio); lbl.appendChild(span);
+      li.appendChild(lbl); ul.appendChild(li);
+    });
+    card.appendChild(ul);
+    root.appendChild(card);
+  });
+}
+
+/* ── READING ── */
+function renderReading(ex, exi, root) {
+  const p = document.createElement('div');
+  p.style.cssText = 'background:#f9f7ff;border-left:4px solid var(--primary-l);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:.95rem;line-height:1.8';
+  p.innerHTML = ex.passage;
+  root.appendChild(p);
+  renderMCQ(ex, exi, root);
+}
+
+/* ── MATCH ── */
+function renderMatch(ex, exi, root) {
+  const wrap = document.createElement('div');
+  wrap.className = 'match-wrap';
+
+  const colL = document.createElement('div');
+  colL.innerHTML = '<div class="match-col-title">Job</div>';
+  const colR = document.createElement('div');
+  colR.innerHTML = '<div class="match-col-title">Task</div>';
+
+  let selectedLeft = null;
+  const resp = state.responses[exi];   // leftId -> rightId
+  const pairColorByLeft = {};
+  let pairCounter = 0;
+
+  function colorFor(leftId) {
+    if (pairColorByLeft[leftId] == null) pairColorByLeft[leftId] = PAIR_COLORS[(pairCounter++) % PAIR_COLORS.length];
+    return pairColorByLeft[leftId];
+  }
+  function refresh() {
+    ex.left.forEach(l => {
+      const item = colL.querySelector(`[data-id="${l.id}"]`);
+      const badge = item.querySelector('.match-badge');
+      item.classList.toggle('selected', selectedLeft === l.id);
+      if (resp[l.id]) {
+        const num = ex.right.findIndex(r => r.id === resp[l.id]) + 1;
+        const c = colorFor(l.id);
+        item.classList.add('paired'); item.style.borderColor = c;
+        badge.style.background = c; badge.textContent = num;
+        const ritem = colR.querySelector(`[data-id="${resp[l.id]}"]`);
+        if (ritem) {
+          ritem.classList.add('paired'); ritem.style.borderColor = c;
+          const rb = ritem.querySelector('.match-badge'); rb.style.background = c; rb.textContent = num;
+        }
+      } else {
+        item.classList.remove('paired'); item.style.borderColor = '';
+        badge.textContent = '';
+      }
+    });
+    // limpiar right no usados
+    ex.right.forEach(r => {
+      const used = Object.values(resp).includes(r.id);
+      const ritem = colR.querySelector(`[data-id="${r.id}"]`);
+      if (!used) { ritem.classList.remove('paired'); ritem.style.borderColor = ''; ritem.querySelector('.match-badge').textContent = ''; }
+    });
+    updateProgress();
+  }
+
+  ex.left.forEach((l, idx) => {
+    const item = document.createElement('div');
+    item.className = 'match-item'; item.dataset.id = l.id;
+    item.innerHTML = `<span class="match-badge"></span><span>${l.text}</span>`;
+    item.addEventListener('click', () => {
+      selectedLeft = (selectedLeft === l.id) ? null : l.id;
+      refresh();
+    });
+    colL.appendChild(item);
+  });
+
+  ex.right.forEach((r, idx) => {
+    const item = document.createElement('div');
+    item.className = 'match-item'; item.dataset.id = r.id;
+    item.innerHTML = `<span class="match-badge"></span><span>${r.text}</span>`;
+    item.addEventListener('click', () => {
+      if (!selectedLeft) { showToast('First select a job on the left.'); return; }
+      // quitar este right de cualquier otro left
+      for (const k of Object.keys(resp)) if (resp[k] === r.id) delete resp[k];
+      resp[selectedLeft] = r.id;
+      selectedLeft = null;
+      refresh();
+    });
+    colR.appendChild(item);
+  });
+
+  wrap.appendChild(colL); wrap.appendChild(colR);
+  root.appendChild(wrap);
+
+  const hint = document.createElement('p');
+  hint.style.cssText = 'font-size:.8rem;color:var(--muted);margin-top:.8rem';
+  hint.textContent = 'Tip: to change a pair, just select the job again and click a new task.';
+  root.appendChild(hint);
+}
+
+/* ── CATEGORIZE (DRAG & DROP + TAP) ── */
+function renderCategorize(ex, exi, root) {
+  const resp = state.responses[exi];      // word -> catId | 'pool'
+  ex.items.forEach(it => { if (!(it.word in resp)) resp[it.word] = 'pool'; });
+
+  let selectedChip = null;  // para modo tap (móvil)
+
+  const pool = document.createElement('div');
+  pool.className = 'cat-pool'; pool.dataset.zone = 'pool';
+
+  const zonesWrap = document.createElement('div');
+  zonesWrap.className = 'cat-zones';
+  const dropAreas = {};   // catId -> element
+  ex.categories.forEach(cat => {
+    const zone = document.createElement('div');
+    zone.className = 'cat-zone';
+    zone.innerHTML = `<div class="cat-zone-title">${cat.label}</div>`;
+    const drop = document.createElement('div');
+    drop.className = 'cat-drop'; drop.dataset.zone = cat.id;
+    zone.appendChild(drop);
+    dropAreas[cat.id] = drop;
+    zone.dataset.cat = cat.id;
+    zonesWrap.appendChild(zone);
+  });
+
+  function makeChip(word) {
+    const chip = document.createElement('div');
+    chip.className = 'chip'; chip.textContent = word; chip.dataset.word = word;
+    chip.draggable = true;
+
+    // Native drag (desktop)
+    chip.addEventListener('dragstart', e => {
+      chip.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', word);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+
+    // Tap-to-select (mobile)
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();   // evita que el click burbujee a la zona contenedora
+      if (selectedChip === word) { selectedChip = null; chip.classList.remove('selected'); }
+      else {
+        document.querySelectorAll(`#exam-container .chip.selected`).forEach(c => c.classList.remove('selected'));
+        selectedChip = word; chip.classList.add('selected');
+        showToast('Now tap a box to drop "' + word + '".');
+      }
+    });
+
+    return chip;
+  }
+
+  function placeChip(word, zoneId) {
+    resp[word] = zoneId;
+    const target = zoneId === 'pool' ? pool : dropAreas[zoneId];
+    const chip = makeChip(word);
+    target.appendChild(chip);
+    selectedChip = null;
+    updateProgress();
+  }
+
+  function moveWord(word, zoneId) {
+    // remove existing chip element
+    document.querySelectorAll(`#exam-container .chip[data-word="${CSS.escape(word)}"]`).forEach(c => c.remove());
+    placeChip(word, zoneId);
+  }
+
+  // Configurar drop targets (pool + zonas)
+  [pool, ...Object.values(dropAreas)].forEach(area => {
+    area.addEventListener('dragover', e => { e.preventDefault(); area.closest('.cat-zone, .cat-pool').classList.add('dragover'); });
+    area.addEventListener('dragleave', () => area.closest('.cat-zone, .cat-pool')?.classList.remove('dragover'));
+    area.addEventListener('drop', e => {
+      e.preventDefault();
+      area.closest('.cat-zone, .cat-pool')?.classList.remove('dragover');
+      const word = e.dataTransfer.getData('text/plain');
+      if (word) moveWord(word, area.dataset.zone);
+    });
+    // Tap-to-drop
+    area.addEventListener('click', () => {
+      if (selectedChip) moveWord(selectedChip, area.dataset.zone);
+    });
+  });
+
+  root.appendChild(pool);
+  root.appendChild(zonesWrap);
+
+  // Pintar chips iniciales (todos en pool, ordenados aleatoriamente para no dar pistas)
+  const shuffled = [...ex.items].sort(() => Math.random() - 0.5);
+  shuffled.forEach(it => placeChip(it.word, resp[it.word]));
+  updateProgress();
+}
+
+/* ── FILL ── */
+function renderFill(ex, exi, root) {
+  ex.items.forEach((it, idx) => {
+    const row = document.createElement('div');
+    row.className = 'fill-row';
+    const before = document.createElement('span'); before.innerHTML = it.before + '&nbsp;';
+    const input = document.createElement('input');
+    input.type = 'text'; input.className = 'fill-input'; input.autocomplete = 'off';
+    input.setAttribute('autocapitalize','off'); input.setAttribute('spellcheck','false');
+    input.placeholder = '...';
+    input.addEventListener('input', () => { state.responses[exi][idx] = input.value; updateProgress(); });
+    const hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = it.hint;
+    const after = document.createElement('span'); after.innerHTML = '&nbsp;' + it.after;
+    row.appendChild(before); row.appendChild(input); row.appendChild(hint); row.appendChild(after);
+    root.appendChild(row);
+  });
+}
+
+/* ── DROPDOWN ── */
+function renderDropdown(ex, exi, root) {
+  ex.items.forEach((it, idx) => {
+    const row = document.createElement('div');
+    row.className = 'dd-row';
+    const before = document.createElement('span'); before.innerHTML = it.before + '&nbsp;';
+    const sel = document.createElement('select');
+    sel.className = 'dd-select';
+    sel.innerHTML = '<option value="">— choose —</option>' + it.options.map(o => `<option value="${o}">${o}</option>`).join('');
+    sel.addEventListener('change', () => { state.responses[exi][idx] = sel.value; updateProgress(); });
+    const after = document.createElement('span'); after.innerHTML = '&nbsp;' + it.after;
+    row.appendChild(before); row.appendChild(sel); row.appendChild(after);
+    root.appendChild(row);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CALIFICACIÓN
+══════════════════════════════════════════════════════════════════ */
+function gradeExercise(ex, exi) {
+  const r = state.responses[exi];
+  let earned = 0, max = 0;
+  const detail = [];
+
+  if (ex.type === "mcq" || ex.type === "reading") {
+    ex.questions.forEach((q, qi) => {
+      max++;
+      const ok = r[qi] === q.correct;
+      if (ok) earned++;
+      detail.push({ ok, label: stripTags(q.text).slice(0, 60),
+        your: r[qi] != null ? stripTags(q.options[r[qi]]) : '(blank)',
+        right: stripTags(q.options[q.correct]) });
+    });
+  }
+  if (ex.type === "match") {
+    ex.left.forEach(l => {
+      max++;
+      const ok = r[l.id] === ex.answer[l.id];
+      if (ok) earned++;
+      const yourR = r[l.id] ? ex.right.find(x => x.id === r[l.id]) : null;
+      const rightR = ex.right.find(x => x.id === ex.answer[l.id]);
+      detail.push({ ok, label: l.text,
+        your: yourR ? stripTags(yourR.text).slice(0,40) : '(blank)',
+        right: stripTags(rightR.text).slice(0,40) });
+    });
+  }
+  if (ex.type === "categorize") {
+    ex.items.forEach(it => {
+      max++;
+      const ok = r[it.word] === it.cat;
+      if (ok) earned++;
+      const catLabel = id => stripTags(ex.categories.find(c => c.id === id)?.label || '(none)');
+      detail.push({ ok, label: it.word,
+        your: r[it.word] && r[it.word] !== 'pool' ? catLabel(r[it.word]) : '(not placed)',
+        right: catLabel(it.cat) });
+    });
+  }
+  if (ex.type === "fill") {
+    ex.items.forEach((it, idx) => {
+      max++;
+      const ok = it.answers.some(a => norm(a) === norm(r[idx]));
+      if (ok) earned++;
+      detail.push({ ok, label: stripTags(it.before) + ' ___ ' + stripTags(it.after),
+        your: r[idx] || '(blank)', right: it.answers[0] });
+    });
+  }
+  if (ex.type === "dropdown") {
+    ex.items.forEach((it, idx) => {
+      max++;
+      const ok = r[idx] === it.correct;
+      if (ok) earned++;
+      detail.push({ ok, label: stripTags(it.before) + ' ___ ' + stripTags(it.after),
+        your: r[idx] || '(blank)', right: it.correct });
+    });
+  }
+  return { earned, max, detail };
+}
+
+function calcGrade() {
+  let totalEarned = 0, totalMax = 0;
+  const perExercise = [];
+  EXERCISES.forEach((ex, exi) => {
+    const g = gradeExercise(ex, exi);
+    totalEarned += g.earned; totalMax += g.max;
+    perExercise.push({ ex, ...g });
+  });
+  const grade = totalMax ? parseFloat((totalEarned / totalMax * 5).toFixed(1)) : 0;
+  return { correct: totalEarned, total: totalMax, grade, perExercise };
+}
+
+function stripTags(s) { return String(s).replace(/<[^>]*>/g, '').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').trim(); }
+
+/* ══════════════════════════════════════════════════════════════════
+   TIMER
+══════════════════════════════════════════════════════════════════ */
+function startTimer() {
+  const display = document.getElementById('timer-display');
+  state.timerInterval = setInterval(() => {
+    state.secondsLeft--;
+    display.textContent = formatTime(state.secondsLeft);
+    if (state.secondsLeft <= 300 && state.secondsLeft > 60) display.className = 'warn';
+    else if (state.secondsLeft <= 60) display.className = 'danger';
+    if (state.secondsLeft <= 0) { clearInterval(state.timerInterval); submitExam(true); }
+  }, 1000);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RESULTADOS
+══════════════════════════════════════════════════════════════════ */
+function showResults(result) {
+  clearInterval(state.timerInterval);
+  showScreen('screen-results');
+  window.scrollTo(0, 0);
+
+  const ring = document.getElementById('score-ring');
+  ring.textContent = result.grade.toFixed(1);
+  ring.className = 'score-ring ' + (result.grade >= 4.0 ? 'great' : result.grade >= 3.0 ? 'pass' : 'fail');
+
+  document.getElementById('result-title').textContent =
+    result.grade >= 3.0 ? 'Exam passed!' : 'Exam not passed';
+  document.getElementById('result-subtitle').textContent =
+    `${state.studentName} · English II · Recovery`;
+
+  const grid = document.getElementById('results-grid');
+  const tabCls = state.tabSwitches === 0 ? 'green' : state.tabSwitches <= 2 ? 'orange' : 'red';
+  const stats = [
+    { label: 'Final grade',  value: result.grade.toFixed(1) + ' / 5.0', cls: result.grade >= 3.0 ? 'green' : 'red' },
+    { label: 'Correct',      value: result.correct, cls: 'green' },
+    { label: 'Incorrect',    value: result.total - result.correct, cls: 'red' },
+    { label: 'Percentage',   value: Math.round(result.correct / result.total * 100) + '%', cls: 'blue' },
+    { label: 'Tab exits',    value: state.tabSwitches === 0 ? '0 ✔' : `${state.tabSwitches} ⚠`, cls: tabCls },
+  ];
+  grid.innerHTML = stats.map(s => `<div class="results-stat"><div class="label">${s.label}</div><div class="value ${s.cls}">${s.value}</div></div>`).join('');
+
+  // Review por actividad
+  const reviewList = document.getElementById('review-list');
+  reviewList.innerHTML = result.perExercise.map(pe => {
+    const rows = pe.detail.map(d => `
+      <div class="review-item ${d.ok ? 'ok' : 'fail'}">
+        <span class="review-icon">${d.ok ? '✔' : '✘'}</span>
+        <div class="review-text">
+          <div class="q">${d.label}</div>
+          <div class="ans">Your answer: <em>${d.your}</em>${!d.ok ? ` · Correct: <strong>${d.right}</strong>` : ''}</div>
+        </div>
+      </div>`).join('');
+    return `<div style="margin-bottom:1.2rem">
+      <div style="font-weight:700;color:var(--primary);margin-bottom:.5rem">
+        ${stripTags(pe.ex.section)} <span style="color:var(--muted);font-weight:500">— ${pe.earned}/${pe.max}</span>
+      </div>${rows}</div>`;
+  }).join('');
+
+  reportGrade(result.grade);
+}
+
+function submitExam(timedOut = false) {
+  if (state.submitted) return;
+  state.submitted = true;
+  state.examActive = false;
+  document.getElementById('submit-bar').style.display = 'none';
+  showResults(calcGrade());
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   REPORTE A LA API
+══════════════════════════════════════════════════════════════════ */
+async function reportGrade(grade) {
+  const statusEl = document.getElementById('api-status');
+  statusEl.className = 'sending';
+  statusEl.textContent = 'Reporting grade in the pending activity…';
+
+  const results = await Promise.allSettled(
+    state.pendingActivities.map(act =>
+      fetch(API_SUBMIT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ studentId: state.studentId, activityId: act.id, score: grade })
+      }).then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        return { name: act.name, skipped: data.skipped === true };
+      })
+    )
+  );
+
+  const sent    = results.filter(r => r.status === 'fulfilled' && !r.value.skipped).map(r => r.value.name);
+  const skipped = results.filter(r => r.status === 'fulfilled' &&  r.value.skipped).map(r => r.value.name);
+  const failed  = results.filter(r => r.status === 'rejected');
+
+  if (failed.length === 0) {
+    statusEl.className = 'success';
+    let html = '';
+    if (sent.length)    html += `✔ Grade <strong>${grade.toFixed(1)}</strong> registered in: ${sent.join(', ')}.<br>`;
+    if (skipped.length) html += `ℹ A grade was already registered in: ${skipped.join(', ')} (not modified).`;
+    statusEl.innerHTML = html || '✔ Grade reported.';
+  } else {
+    const payloads = state.pendingActivities.map(act =>
+      JSON.stringify({ studentId: state.studentId, activityId: act.id, score: grade })).join('\n');
+    statusEl.className = 'error';
+    statusEl.innerHTML =
+      `⚠ The grade could not be reported automatically.<br>
+       <small>Error: ${failed[0].reason?.message}</small><br><br>
+       <strong>Grade obtained: ${grade.toFixed(1)} / 5.0</strong><br>
+       <small>Payloads for manual report:</small><br>
+       <code style="font-size:.78rem;word-break:break-all;white-space:pre-wrap">${payloads}</code>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   EVENT LISTENERS
+══════════════════════════════════════════════════════════════════ */
+document.getElementById('btn-start').addEventListener('click', () => {
+  const studentSel = document.getElementById('sel-student');
+  if (!studentSel.value) { alert('Please select your name to continue.'); return; }
+
+  const selectedOpt = studentSel.options[studentSel.selectedIndex];
+  state.studentId         = studentSel.value;
+  state.studentName       = selectedOpt.text;
+  state.pendingActivities = JSON.parse(selectedOpt.dataset.activities || '[]');
+
+  document.querySelector('#app-header h1').textContent =
+    `${state.studentName.split(' ')[0]} · English II Recovery`;
+
+  document.getElementById('timer-box').style.display  = 'flex';
+  document.getElementById('progress-bar-wrap').style.display = 'block';
+  document.getElementById('timer-display').textContent = formatTime(DURATION_SECONDS);
+
+  renderExam();
+  showScreen('screen-exam');
+  window.scrollTo(0, 0);
+  startTimer();
+  state.examActive = true;
+
+  const badge = document.createElement('span');
+  badge.id = 'tab-badge';
+  badge.className = 'tab-switch-badge none';
+  badge.textContent = '✔ No exits';
+  document.getElementById('timer-box').prepend(badge);
+});
+
+document.getElementById('btn-submit').addEventListener('click', () => {
+  const pending = TOTAL_ITEMS - answeredItemCount();
+  const msg = pending > 0
+    ? `You still have <strong>${pending} item(s) without an answer</strong>. Do you want to submit anyway?`
+    : 'Are you sure you want to submit the exam? You will not be able to change your answers.';
+  document.getElementById('modal-msg').innerHTML = msg;
+  document.getElementById('modal-overlay').classList.add('open');
+});
+
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+document.getElementById('modal-confirm').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+  submitExam();
+});
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open');
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   ANTI-TRAMPA
+══════════════════════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg, isWarn = false) {
+  const t = document.getElementById('cheat-toast');
+  t.textContent = msg;
+  t.classList.toggle('warn-color', isWarn);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+document.addEventListener('contextmenu', e => {
+  if (!state.examActive) return;
+  e.preventDefault();
+  showToast('⛔ Right-click is disabled during the exam.');
+});
+['copy', 'cut', 'paste'].forEach(evt => {
+  document.addEventListener(evt, e => {
+    if (!state.examActive) return;
+    e.preventDefault();
+    showToast('⛔ Copy/paste is disabled during the exam.');
+  });
+});
+document.addEventListener('keydown', e => {
+  if (!state.examActive) return;
+  if (e.ctrlKey && ['c','x','v','a'].includes(e.key.toLowerCase())) {
+    e.preventDefault();
+    showToast('⛔ Keyboard shortcut disabled during the exam.');
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (!state.examActive || state.submitted) return;
+  if (document.hidden) {
+    state.tabSwitches++;
+    const badge = document.getElementById('tab-badge');
+    if (badge) {
+      badge.textContent = `⚠ ${state.tabSwitches} tab exit(s)`;
+      badge.className = 'tab-switch-badge ' + (state.tabSwitches >= 3 ? 'high' : 'low');
+    }
+  } else {
+    showToast(`⚠ A tab exit was registered (${state.tabSwitches} time${state.tabSwitches > 1 ? 's' : ''}).`, true);
+  }
+});
+</script>
+</body>
+</html>

@@ -89,6 +89,7 @@
     }
     .course-card.db::after   { background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(59,130,246,.2)); }
     .course-card.web2::after { background: linear-gradient(135deg, rgba(236,72,153,.25), rgba(245,158,11,.2)); }
+    .course-card.eng::after  { background: linear-gradient(135deg, rgba(16,185,129,.25), rgba(6,182,212,.2)); }
     .course-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,.25); }
     .course-card:hover::after { opacity: 1; }
     .course-card .icon { display: flex; align-items: center; justify-content: center; margin-bottom: .9rem; position: relative; z-index: 1; }
@@ -102,6 +103,7 @@
     }
     .course-card.db   .badge { background: rgba(124,58,237,.3); color: var(--purple-l); }
     .course-card.web2 .badge { background: rgba(236,72,153,.3); color: #f9a8d4; }
+    .course-card.eng  .badge { background: rgba(16,185,129,.3); color: #6ee7b7; }
 
     /* ── SCREEN 2: STUDENTS ── */
     .students-wrap { width: 100%; max-width: 460px; }
@@ -325,6 +327,12 @@
         <h2>Programación Web II</h2>
         <p>Node.js, npm y Express</p>
         <span class="badge">10 preguntas</span>
+      </div>
+      <div class="course-card eng" onclick="location.href='ingles-2/examen-recuperacion/'">
+        <span class="icon"><i data-lucide="languages"></i></span>
+        <h2>Inglés II</h2>
+        <p>Tech Jobs, Comparatives &amp; Tech Trends</p>
+        <span class="badge">Recuperación</span>
       </div>
     </div>
   </div>
