@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parcial Virtual – Programación Web II Backend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #0f5e56;
+      --primary-l: #14887c;
+      --soft:      #eaf6f4;
+      --soft-b:    #cde9e4;
+      --accent:    #2ecc71;
+      --danger:    #e74c3c;
+      --warn:      #f39c12;
+      --blue:      #3498db;
+      --bg:        #eef4f3;
+      --card:      #ffffff;
+      --text:      #1a202c;
+      --muted:     #718096;
+      --border:    #e2e8f0;
+      --code-bg:   #1e1e2e;
+      --code-text: #cdd6f4;
+      --radius:    10px;
+      --font:      'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono:      'IBM Plex Mono', 'Consolas', 'Menlo', monospace;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ───── HEADER ───── */
+    header {
+      background: var(--primary); color: #fff; padding: 0 1.5rem;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      display: flex; align-items: center; justify-content: space-between; height: 56px; gap: 1rem;
+    }
+    header h1 { font-size: 1rem; font-weight: 700; letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #timer-box { display: flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .95rem; flex-shrink: 0; }
+    #timer-box svg { flex-shrink: 0; }
+    #timer-display { min-width: 60px; text-align: right; }
+    #timer-display.warn   { color: var(--warn); }
+    #timer-display.danger { color: #ffb4a8; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ───── PROGRESS BAR ───── */
+    #progress-bar-wrap { background: #b9d8d3; height: 5px; position: sticky; top: 56px; z-index: 99; }
+    #progress-bar { height: 100%; background: var(--accent); transition: width .4s ease; width: 0%; }
+
+    /* ───── LAYOUT ───── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .container { max-width: 860px; margin: 0 auto; padding: 2rem 1rem 6rem; }
+    .card { background: var(--card); border-radius: var(--radius); padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 1.5rem; }
+
+    /* ───── START SCREEN ───── */
+    #screen-start .hero { text-align: center; padding: 2.5rem 1rem 1.5rem; }
+    .badge-course {
+      display: inline-block; background: var(--primary); color: #fff; font-size: .75rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; padding: .3rem .9rem; border-radius: 20px; margin-bottom: 1rem;
+    }
+    #screen-start h2 { font-size: 1.9rem; color: var(--primary); margin-bottom: .5rem; }
+    #screen-start p.subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .info-item { border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; background: #fff; }
+    .info-item .label { font-size: .7rem; text-transform: uppercase; color: var(--muted); letter-spacing: .8px; }
+    .info-item .value { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-top: .2rem; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: .4rem; color: var(--primary); }
+    .form-group select {
+      width: 100%; padding: .65rem .85rem; border: 1.5px solid var(--border); border-radius: 7px;
+      font-size: .95rem; font-family: inherit; color: var(--text); background: #fff; transition: border-color .2s;
+    }
+    .form-group select:focus { outline: none; border-color: var(--primary); }
+
+    .group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.25rem; }
+    .group-btn {
+      padding: .9rem; border: 2px solid var(--border); border-radius: 9px; background: #fff; cursor: pointer;
+      font-family: inherit; font-size: 1rem; font-weight: 700; color: var(--primary); transition: border-color .15s, background .15s;
+    }
+    .group-btn:hover { border-color: var(--primary-l); background: var(--soft); }
+    .group-btn.active { border-color: var(--primary); background: var(--soft); box-shadow: 0 0 0 2px rgba(15,94,86,.18); }
+
+    .rules ul { list-style: none; padding: 0; }
+    .rules ul li { position: relative; padding: .45rem 0 .45rem 1.1rem; border-bottom: 1px solid var(--border); font-size: .9rem; }
+    .rules ul li:last-child { border-bottom: none; }
+    .rules ul li::before { content: ""; position: absolute; left: 0; top: 1.05rem; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+    .rules ul li.warn-rule { color: #9b2335; }
+    .rules ul li.warn-rule::before { background: var(--danger); }
+
+    /* ───── BUTTONS ───── */
+    .btn { display: inline-block; padding: .75rem 2rem; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; border: none; transition: opacity .2s, transform .1s; font-family: inherit; }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { opacity: .88; }
+    .btn-accent  { background: var(--accent); color: #fff; }
+    .btn-accent:hover:not(:disabled) { opacity: .88; }
+    .btn-danger  { background: var(--danger); color: #fff; }
+    .btn-block   { width: 100%; text-align: center; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+
+    /* ───── SECTION ───── */
+    .section-header { display: flex; align-items: center; gap: .75rem; margin-bottom: .4rem; flex-wrap: wrap; }
+    .section-pill { background: var(--primary); color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; padding: .25rem .75rem; border-radius: 20px; white-space: nowrap; }
+    .section-title { font-size: 1.15rem; font-weight: 700; color: var(--primary); }
+    .section-pts   { font-size: .82rem; color: var(--muted); margin-left: auto; }
+    .section-instr {
+      font-size: .88rem; color: #2f6b64; background: var(--soft); border: 1px solid var(--soft-b);
+      border-radius: 8px; padding: .6rem .85rem; margin-bottom: 1.1rem; display: flex; gap: .5rem; align-items: flex-start;
+    }
+    .section-instr svg { flex-shrink: 0; margin-top: 2px; }
+
+    /* ───── QUESTION CARD ───── */
+    .question-card { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
+    .question-card.answered { border-color: #9fd6ce; }
+    .q-number { display: inline-block; background: var(--primary); color: #fff; font-size: .75rem; font-weight: 700; padding: .15rem .55rem; border-radius: 4px; margin-bottom: .75rem; }
+    .q-text { font-size: .97rem; margin-bottom: 1rem; line-height: 1.7; }
+    .q-text code, .options code, .fill-row code, .dd-row code {
+      background: #edf2f7; padding: 1px 6px; border-radius: 4px; font-family: var(--mono); font-size: .86em;
+    }
+    pre.code-block {
+      background: var(--code-bg); color: var(--code-text); font-family: var(--mono);
+      font-size: .83rem; padding: 1rem 1.2rem; border-radius: 7px; overflow-x: auto; margin: -.2rem 0 1rem; line-height: 1.55; tab-size: 4;
+    }
+
+    /* ───── MCQ OPTIONS ───── */
+    .options { list-style: none; display: flex; flex-direction: column; gap: .55rem; }
+    .options li label {
+      display: flex; align-items: flex-start; gap: .65rem; padding: .7rem .9rem; border: 1.5px solid var(--border);
+      border-radius: 7px; cursor: pointer; transition: background .15s, border-color .15s; font-size: .93rem;
+    }
+    .options li label:hover { background: #f5fbfa; border-color: #9fd6ce; }
+    .options li input[type=radio] { margin-top: .2rem; accent-color: var(--primary); flex-shrink: 0; }
+    .options li.selected label { background: var(--soft); border-color: var(--primary); }
+
+    /* ───── FILL IN THE BLANK ───── */
+    .fill-row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding: .75rem 0; border-bottom: 1px dashed var(--border); font-size: .95rem; }
+    .fill-row:last-child { border-bottom: none; }
+    .fill-row .fill-code { font-family: var(--mono); font-size: .88rem; background: var(--code-bg); color: var(--code-text); padding: .45rem .7rem; border-radius: 6px; display: inline-flex; align-items: center; flex-wrap: wrap; gap: .3rem; }
+    .fill-input {
+      border: none; border-bottom: 2px solid var(--primary-l); background: #f5fbfa; font-family: var(--mono);
+      font-size: .9rem; padding: .2rem .5rem; width: 130px; color: var(--primary); font-weight: 700; text-align: center; border-radius: 4px 4px 0 0;
+    }
+    .fill-code .fill-input { background: #313244; color: #a6e3a1; border-bottom-color: #94e2d5; }
+    .fill-input:focus { outline: none; border-bottom-color: var(--primary); }
+
+    /* ───── DROPDOWN ───── */
+    .dd-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: .75rem 0; border-bottom: 1px dashed var(--border); font-size: .94rem; }
+    .dd-row:last-child { border-bottom: none; }
+    .dd-row .dd-text { flex: 1 1 320px; }
+    .dd-select {
+      border: 1.5px solid var(--primary-l); border-radius: 6px; background: #f5fbfa; font-family: inherit;
+      font-size: .9rem; padding: .35rem .5rem; color: var(--primary); font-weight: 600; min-width: 210px;
+    }
+    .dd-select:focus { outline: none; border-color: var(--primary); }
+    .flow-step { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 800; font-size: .8rem; flex-shrink: 0; }
+
+
+    /* ───── CATEGORIZE ───── */
+    .cat-row { border: 1.5px solid var(--border); border-radius: 8px; padding: .8rem .9rem; margin-bottom: .65rem; }
+    .cat-row.answered { border-color: #9fd6ce; }
+    .cat-text { font-size: .93rem; font-weight: 600; margin-bottom: .55rem; word-break: break-word; }
+    .cat-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: .45rem; }
+    @media (max-width: 560px) { .cat-btns { grid-template-columns: 1fr 1fr; } }
+    .cat-btn {
+      padding: .55rem .4rem; border: 1.5px solid var(--border); border-radius: 7px; background: #fff; color: var(--text);
+      font-family: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s;
+    }
+    .cat-btn:hover { border-color: #9fd6ce; background: #f5fbfa; }
+    .cat-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* ───── FLOATING SUBMIT ───── */
+    #submit-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border); padding: .9rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; z-index: 200; box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+    }
+    #answered-count { font-size: .88rem; color: var(--muted); }
+    #answered-count span { font-weight: 700; color: var(--primary); }
+
+    /* ───── RESULTS ───── */
+    #screen-results .hero { text-align: center; padding: 2rem 1rem 1rem; }
+    .score-ring { display: inline-flex; align-items: center; justify-content: center; width: 140px; height: 140px; border-radius: 50%; font-size: 2.5rem; font-weight: 900; border: 6px solid var(--accent); margin: 1rem auto 1.5rem; }
+    .score-ring.fail  { border-color: var(--danger); color: var(--danger); }
+    .score-ring.pass  { border-color: var(--accent); color: var(--accent); }
+    .score-ring.great { border-color: var(--blue);   color: var(--blue); }
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .results-stat { border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; }
+    .results-stat .label { font-size: .7rem; text-transform: uppercase; color: var(--muted); letter-spacing: .8px; }
+    .results-stat .value { font-size: 1.3rem; font-weight: 800; margin-top: .25rem; }
+    .results-stat .value.green  { color: var(--accent); }
+    .results-stat .value.red    { color: var(--danger); }
+    .results-stat .value.blue   { color: var(--blue); }
+    .results-stat .value.orange { color: var(--warn); }
+
+    #api-status { padding: 1rem; border-radius: 8px; font-size: .9rem; margin-bottom: 1rem; text-align: center; }
+    #api-status.sending { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+    #api-status.success { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+    #api-status.error   { background: #fff5f5; color: #9b2335; border: 1px solid #fc8181; }
+
+    #review-section h3 { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; }
+    .review-item { padding: .8rem 1rem; border-radius: 8px; margin-bottom: .55rem; font-size: .87rem; display: flex; gap: .75rem; align-items: flex-start; }
+    .review-item.ok   { background: #f0fff4; border-left: 3px solid var(--accent); }
+    .review-item.fail { background: #fff5f5; border-left: 3px solid var(--danger); }
+    .review-icon { font-size: 1rem; flex-shrink: 0; }
+    .review-text .q { font-weight: 600; color: var(--text); }
+    .review-text .ans { color: var(--muted); font-size: .83rem; margin-top: .2rem; }
+
+    /* ───── MODAL ───── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 500; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: var(--radius); padding: 2rem; max-width: 440px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .modal h3 { font-size: 1.1rem; margin-bottom: .75rem; color: var(--primary); }
+    .modal p  { font-size: .93rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+    .modal-buttons { display: flex; gap: .75rem; justify-content: flex-end; }
+
+    .notice-info { display: flex; gap: .65rem; align-items: flex-start; background: var(--soft); border: 1px solid var(--soft-b); border-radius: 8px; padding: .85rem 1rem; font-size: .88rem; color: #0f5e56; line-height: 1.55; }
+
+    /* ───── ANTI-TRAMPA ───── */
+    #cheat-toast {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #2d3748; color: #fff;
+      padding: .7rem 1.4rem; border-radius: 8px; font-size: .88rem; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,.35); z-index: 999;
+      opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; max-width: 92vw; text-align: center;
+    }
+    #cheat-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #cheat-toast.warn-color { background: #c53030; }
+    .tab-switch-badge { display: inline-block; padding: .15rem .55rem; border-radius: 20px; font-size: .75rem; font-weight: 700; vertical-align: middle; white-space: nowrap; }
+    .tab-switch-badge.none { background: #f0fff4; color: #276749; }
+    .tab-switch-badge.low  { background: #fffbeb; color: #b7791f; }
+    .tab-switch-badge.high { background: #fff5f5; color: #9b2335; }
+    .exam-protected, .exam-protected * { -webkit-user-select: none; user-select: none; }
+    .exam-protected input { -webkit-user-select: text; user-select: text; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: .85rem; }
+      .card { padding: 1.25rem; }
+      #screen-start h2 { font-size: 1.5rem; }
+      .dd-select { min-width: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="app-header">
+  <h1>Programación Web II Backend — Parcial Unidad 1</h1>
+  <div id="timer-box" style="display:none">
+    <span id="tab-badge" class="tab-switch-badge none">✔ Sin salidas</span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span id="timer-display">60:00</span>
+  </div>
+</header>
+<div id="progress-bar-wrap" style="display:none"><div id="progress-bar"></div></div>
+
+<!-- ═══════════ SCREEN: START ═══════════ -->
+<section id="screen-start" class="screen active">
+  <div class="container" style="max-width:680px">
+
+    <div class="hero">
+      <div class="badge-course">Técnico Profesional · Programación Web</div>
+      <h2>Parcial Virtual — Unidad 1</h2>
+      <p class="subtitle">Programación Web II Backend &nbsp;·&nbsp; Refactorización y arquitectura por capas</p>
+
+      <div class="info-grid">
+        <div class="info-item"><div class="label">Duración</div><div class="value">60 min</div></div>
+        <div class="info-item"><div class="label">Actividades</div><div class="value">7</div></div>
+        <div class="info-item"><div class="label">Puntaje total</div><div class="value">5.0 pts</div></div>
+        <div class="info-item"><div class="label">Aprobación</div><div class="value">≥ 3.0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:1rem;color:var(--primary)">Identificación</h3>
+
+      <div class="form-group" style="margin-bottom:.5rem">
+        <label>Grupo</label>
+      </div>
+      <div class="group-grid" id="group-grid"></div>
+
+      <div id="st-idle" style="color:var(--muted);font-size:.9rem;padding:.25rem 0">Selecciona tu grupo para cargar la lista de estudiantes.</div>
+
+      <div id="st-loading" style="display:none;align-items:center;gap:.7rem;color:var(--muted);font-size:.9rem;padding:.5rem 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;flex-shrink:0"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Cargando estudiantes...
+      </div>
+
+      <div id="st-error" style="display:none;background:#fff5f5;border:1px solid #fc8181;border-radius:8px;padding:.85rem 1rem;font-size:.88rem;color:#9b2335">
+        <strong>No se pudo cargar la lista de estudiantes.</strong>
+        <span id="st-error-msg"></span>
+        <br><button onclick="loadStudents()" style="margin-top:.6rem;background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:.4rem .9rem;cursor:pointer;font-size:.83rem">Reintentar</button>
+      </div>
+
+      <div id="st-empty" style="display:none;background:#f0fff4;border:1px solid #9ae6b4;border-radius:8px;padding:.85rem 1rem;font-size:.88rem;color:#276749">
+        ✔ Todos los estudiantes de este grupo ya tienen nota registrada en esta actividad.
+      </div>
+
+      <div id="st-ready" style="display:none">
+        <div class="form-group">
+          <label for="sel-student">Estudiante</label>
+          <select id="sel-student">
+            <option value="">— Selecciona tu nombre —</option>
+          </select>
+        </div>
+        <div class="notice-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="notice-activities">La nota obtenida se registrará automáticamente en la actividad pendiente.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card rules">
+      <h3 style="margin-bottom:.85rem;color:var(--primary)">Instrucciones</h3>
+      <ul>
+        <li>El examen tiene <strong>7 actividades</strong>: selección múltiple, análisis de código, emparejamiento, clasificar por capas, ordenar el flujo, refactorizar por capas y completar código.</li>
+        <li>La nota se calcula sobre <strong>5.0</strong> según los ítems correctos. No hay puntos negativos por respuesta incorrecta.</li>
+        <li>Tienes <strong>60 minutos</strong> desde que inicias. El tiempo no se detiene, ni siquiera si cierras o recargas la página.</li>
+        <li>Copiar, pegar, cortar, seleccionar texto y el clic derecho están <strong>deshabilitados</strong>.</li>
+        <li class="warn-rule">Cada salida de la pantalla del examen (cambiar de pestaña, minimizar, abrir otra aplicación o recargar) <strong>descuenta <span id="rule-penalty">0.2</span> puntos</strong> de la nota final.</li>
+        <li class="warn-rule">Al llegar a <strong><span id="rule-max-exits">5</span> salidas</strong> el examen se envía automáticamente.</li>
+        <li>Una vez enviado <strong>no podrás modificar tus respuestas</strong>. La nota se reporta automáticamente a e-notes.</li>
+        <li>Temas: refactorización · arquitectura por capas (rutas, controladores, servicios y repositorios) · organización del proyecto · middleware finalizador.</li>
+      </ul>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="btn-start" disabled>Iniciar Examen</button>
+  </div>
+</section>
+
+<!-- ═══════════ SCREEN: EXAM ═══════════ -->
+<section id="screen-exam" class="screen">
+  <div class="container" id="exam-container"></div>
+  <div id="submit-bar">
+    <div id="answered-count">Respondidos: <span id="cnt">0</span> / <span id="cnt-total">0</span></div>
+    <button class="btn btn-accent" id="btn-submit">Enviar examen</button>
+  </div>
+</section>
+
+<!-- ═══════════ SCREEN: RESULTS ═══════════ -->
+<section id="screen-results" class="screen">
+  <div class="container" style="max-width:740px">
+    <div class="hero">
+      <div id="score-ring" class="score-ring"></div>
+      <h2 id="result-title" style="color:var(--primary);margin-bottom:.3rem"></h2>
+      <p id="result-subtitle" style="color:var(--muted)"></p>
+    </div>
+
+    <div class="card">
+      <div class="results-grid" id="results-grid"></div>
+      <div id="api-status" class="sending">Reportando nota al sistema…</div>
+    </div>
+
+    <div class="card" id="review-section">
+      <h3>Revisión por actividad</h3>
+      <div id="review-list"></div>
+    </div>
+
+    <a href="../../../index.html#tecnico/3" class="btn btn-primary btn-block" style="text-decoration:none;display:block;text-align:center">
+      Cerrar examen
+    </a>
+  </div>
+</section>
+
+<div id="cheat-toast"></div>
+
+<!-- MODAL CONFIRM -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <h3>¿Enviar examen?</h3>
+    <p id="modal-msg">Una vez enviado no podrás cambiar tus respuestas. ¿Estás seguro/a de continuar?</p>
+    <div class="modal-buttons">
+      <button class="btn btn-outline" id="modal-cancel">Cancelar</button>
+      <button class="btn btn-danger"  id="modal-confirm">Sí, enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SALIDA DE PANTALLA -->
+<div id="exit-overlay" class="modal-overlay">
+  <div class="modal">
+    <h3 style="color:#c53030">⚠ Saliste de la pantalla del examen</h3>
+    <p id="exit-msg"></p>
+    <div class="modal-buttons">
+      <button class="btn btn-primary" id="exit-ok">Entendido, continuar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   CONFIGURACIÓN — integración e-notes (un token por grupo)
+══════════════════════════════════════════════════════════════════ */
+const API_HOST = "https://enotes.ecodestudio.dev/api/integrations/";
+const GROUPS = [
+  { key: "1A", label: "Grupo 1A", token: "25ffebc0117c1316caf3b0ded68b907f40b4487fed2468cb" },
+  { key: "2A", label: "Grupo 2A", token: "6dffe4f9c9f2d9b9dfe39e0c49cb395dd43b445c10a699d1" },
+];
+const EXAM_ID          = "web2-backend-u1";
+const DURATION_SECONDS = 60 * 60;
+const PENALTY_PER_EXIT = 0.2;   // puntos descontados por cada salida de la pantalla
+const MAX_EXITS        = 5;     // al llegar a este número de salidas se envía el examen
+const BLUR_GRACE_MS    = 1500;  // una pérdida de foco menor a esto no cuenta como salida
+
+/* ══════════════════════════════════════════════════════════════════
+   BANCO DE ACTIVIDADES — Guía Tema 1, Unidad 1
+   (las preguntas y opciones se barajan por estudiante)
+══════════════════════════════════════════════════════════════════ */
+const EXERCISES = [
+
+  /* ─── 1. CONCEPTOS — SELECCIÓN MÚLTIPLE ─── */
+  {
+    type: "mcq",
+    section: "Conceptos de refactorización y arquitectura por capas",
+    instr: "Lee cada pregunta y selecciona la única respuesta correcta.",
+    questions: [
+      { text: "¿Qué significa <strong>refactorizar</strong> una API REST?",
+        options: [
+          "Reorganizar el código para mejorar su estructura interna sin alterar el comportamiento externo de la aplicación.",
+          "Agregar nuevas funcionalidades y endpoints a la API existente.",
+          "Borrar la base de datos y crearla de nuevo.",
+          "Reescribir la API desde cero en un lenguaje diferente."], correct: 0 },
+      { text: "¿Cuál es la responsabilidad principal de la capa de <strong>rutas (routes)</strong>?",
+        options: [
+          "Asociar una URL y un método HTTP con el controlador encargado de atender la solicitud.",
+          "Aplicar las reglas de negocio, como verificar que el correo no exista.",
+          "Ejecutar las consultas SQL sobre la base de datos.",
+          "Almacenar las configuraciones generales del proyecto."], correct: 0 },
+      { text: "¿Qué diferencia existe entre un <strong>controlador</strong> y un <strong>servicio</strong>?",
+        options: [
+          "El controlador coordina la petición HTTP (recibe datos, invoca y responde); el servicio implementa la lógica del negocio.",
+          "El controlador ejecuta las consultas SQL y el servicio define los endpoints.",
+          "No hay diferencia: ambos nombres se usan para la misma capa.",
+          "El servicio responde directamente al cliente con <code>res.json()</code> y el controlador valida reglas de negocio."], correct: 0 },
+      { text: "¿Por qué las consultas SQL deberían implementarse en los <strong>repositorios</strong>?",
+        options: [
+          "Porque así todo el acceso a la base de datos queda en un solo lugar y, si una consulta cambia, solo se modifica esa capa.",
+          "Porque Express no permite ejecutar SQL dentro de los controladores.",
+          "Porque los repositorios son los primeros en recibir la petición HTTP.",
+          "Porque así las consultas se ejecutan más rápido en la base de datos."], correct: 0 },
+      { text: "¿En qué capa se implementan las <strong>reglas del negocio</strong>, como verificar que un correo no esté registrado antes de crear un usuario?",
+        options: [
+          "En la capa de servicios.",
+          "En la capa de rutas.",
+          "En la capa de repositorios.",
+          "En el archivo app.js."], correct: 0 },
+      { text: "En la base de datos, la tabla <code>clientes</code> cambió de nombre a <code>usuarios</code>. Si la API está bien organizada por capas, ¿qué capa hay que modificar para actualizar las consultas?",
+        options: [
+          "En los repositorios.",
+          "En las rutas.",
+          "En los controladores.",
+          "En todas las capas por igual."], correct: 0 },
+      { text: "¿Cuál de las siguientes es una <strong>ventaja</strong> de la arquitectura por capas frente a tener toda la API en un único archivo <code>app.js</code>?",
+        options: [
+          "Facilita el mantenimiento y permite que varios desarrolladores trabajen en distintas capas o módulos al mismo tiempo.",
+          "Hace que la API responda sin necesidad de una base de datos.",
+          "Elimina la necesidad de escribir controladores.",
+          "Permite escribir todas las consultas SQL dentro de las rutas."], correct: 0 },
+      { text: "¿Qué es un <strong>middleware finalizador</strong> en Express?",
+        options: [
+          "Una función que termina el ciclo de la petición enviando la respuesta al cliente, por ejemplo con <code>res.json()</code> o <code>res.send()</code>.",
+          "Una función que guarda los datos en la base de datos al final del día.",
+          "Un repositorio que cierra la conexión con la base de datos.",
+          "Una ruta que solo se ejecuta cuando el servidor se apaga."], correct: 0 },
+    ]
+  },
+
+  /* ─── 2. ANÁLISIS DE CÓDIGO ─── */
+  {
+    type: "mcq",
+    section: "Análisis de código",
+    instr: "Analiza cada fragmento de código de una API en Express y responde.",
+    questions: [
+      { text: "¿A qué capa de la arquitectura pertenece el siguiente fragmento?",
+        code: `import { obtenerTodos } from '../services/usuario.service.js';
+
+export const obtenerUsuarios = async (req, res) => {
+    const usuarios = await obtenerTodos();
+    res.json(usuarios);
+};`,
+        options: ["Controlador", "Ruta", "Servicio", "Repositorio"], correct: 0 },
+      { text: "¿A qué capa pertenece este código?",
+        code: `import { buscarPorCorreo, crear } from '../repositories/usuario.repository.js';
+
+export const crearUsuario = async (datos) => {
+    const usuarioExistente = await buscarPorCorreo(datos.correo);
+
+    if (usuarioExistente) {
+        throw new Error("El correo ya se encuentra registrado.");
+    }
+    return await crear(datos);
+};`,
+        options: ["Servicio", "Controlador", "Repositorio", "Middleware"], correct: 0 },
+      { text: "Un compañero escribió esta ruta. Según la arquitectura por capas, ¿cuál es el <strong>problema</strong>?",
+        code: `router.get('/', async (req, res) => {
+    const [usuarios] = await conexion.query("SELECT * FROM usuarios");
+    res.json(usuarios);
+});`,
+        options: [
+          "La ruta mezcla responsabilidades: ejecuta SQL y responde, cuando solo debería dirigir la petición a un controlador.",
+          "Las rutas no pueden usar funciones async.",
+          "Las rutas deben usar el método POST para consultar datos.",
+          "El método GET no puede devolver JSON."], correct: 0 },
+      { text: "El siguiente fragmento consulta la base de datos. ¿En qué capa debe estar ubicado?",
+        code: `import conexion from '../database/conexion.js';
+
+export const buscarPorCorreo = async (correo) => {
+    const [usuarios] = await conexion.query(
+        "SELECT * FROM usuarios WHERE correo = ?",
+        [correo]
+    );
+    return usuarios[0];
+};`,
+        options: ["Repositorio", "Servicio", "Controlador", "Ruta"], correct: 0 },
+      { text: "Este código está en <code>services/producto.service.js</code>. Según la arquitectura por capas, ¿cuál es el <strong>problema</strong>?",
+        code: `import { obtenerTodos } from '../repositories/producto.repository.js';
+
+export const obtenerProductos = async (req, res) => {
+    const productos = await obtenerTodos();
+    res.json(productos);
+};`,
+        options: [
+          "El servicio está respondiendo directamente al cliente con res.json(); eso es responsabilidad del controlador.",
+          "Los servicios no pueden llamar a los repositorios.",
+          "El servicio debería ejecutar la consulta SQL directamente en lugar de usar el repositorio.",
+          "No hay ningún problema, así debe escribirse un servicio."], correct: 0 },
+      { text: "Este middleware finalizador se ubica <strong>al final</strong> de <code>app.js</code>, después de todas las rutas. ¿Qué hace?",
+        code: `app.use('/usuarios', usuarioRoutes);
+app.use('/productos', productoRoutes);
+
+app.use((req, res) => {
+    res.status(404).json({ mensaje: "Ruta no encontrada" });
+});`,
+        options: [
+          "Responde con un error 404 a las peticiones que no coincidieron con ninguna ruta, finalizando la petición.",
+          "Elimina de la base de datos los usuarios que no se encuentran.",
+          "Se ejecuta antes que todas las rutas y bloquea todas las peticiones.",
+          "Redirige automáticamente al cliente a la ruta /usuarios."], correct: 0 },
+    ]
+  },
+
+  /* ─── 3. EMPAREJAMIENTO — CARPETA ↔ PROPÓSITO ─── */
+  {
+    type: "match",
+    section: "Organización del proyecto Backend",
+    instr: "Para cada carpeta del proyecto, elige en la lista cuál es su propósito.",
+    leftTitle: "Carpeta",
+    rightTitle: "Propósito",
+    left: [
+      { id: "l0", text: "<code>routes/</code>" },
+      { id: "l1", text: "<code>controllers/</code>" },
+      { id: "l2", text: "<code>services/</code>" },
+      { id: "l3", text: "<code>repositories/</code>" },
+      { id: "l5", text: "<code>config/</code>" },
+      { id: "l6", text: "<code>database/</code>" },
+      { id: "l7", text: "<code>utils/</code>" },
+    ],
+    right: [
+      { id: "r0", text: "Define los endpoints de la API." },
+      { id: "r1", text: "Coordina las solicitudes HTTP." },
+      { id: "r2", text: "Implementa la lógica del negocio." },
+      { id: "r3", text: "Gestiona el acceso a la base de datos (consultas)." },
+      { id: "r5", text: "Almacena configuraciones generales." },
+      { id: "r6", text: "Gestiona la conexión con la base de datos." },
+      { id: "r7", text: "Contiene funciones auxiliares reutilizables." },
+    ],
+    answer: { l0: "r0", l1: "r1", l2: "r2", l3: "r3", l5: "r5", l6: "r6", l7: "r7" }
+  },
+
+  /* ─── 4. CLASIFICAR — RESPONSABILIDAD ↔ CAPA ─── */
+  {
+    type: "categorize",
+    section: "¿En qué capa va cada responsabilidad?",
+    instr: "Para cada responsabilidad, toca el botón de la capa donde debe ir.",
+    categories: [
+      { id: "ruta",  label: "Rutas" },
+      { id: "ctrl",  label: "Controladores" },
+      { id: "serv",  label: "Servicios" },
+      { id: "repo",  label: "Repositorios" },
+    ],
+    items: [
+      { id: "i0", word: "router.post('/', crearUsuario)", cat: "ruta" },
+      { id: "i1", word: "Asociar GET /productos con su controlador",         cat: "ruta" },
+      { id: "i2", word: "Leer req.body y responder con res.json()",          cat: "ctrl" },
+      { id: "i3", word: "Invocar al servicio y devolver la respuesta",       cat: "ctrl" },
+      { id: "i4", word: "Verificar que el correo no esté registrado",        cat: "serv" },
+      { id: "i5", word: "Comprobar que la contraseña cumpla los requisitos", cat: "serv" },
+      { id: "i6", word: "SELECT * FROM usuarios WHERE correo = ?",           cat: "repo" },
+      { id: "i7", word: "Insertar, actualizar o eliminar registros",         cat: "repo" },
+    ]
+  },
+
+  /* ─── 5. ORDENAR EL FLUJO DE UNA PETICIÓN ─── */
+  {
+    type: "dropdown",
+    section: "Flujo de una petición por capas",
+    instr: "Un cliente consulta <code>GET /usuarios</code>. Ordena el recorrido de la solicitud desde que sale del cliente hasta llegar a los datos. Selecciona qué componente va en cada paso.",
+    flow: true,
+    items: [
+      { before: "<span class='flow-step'>1</span> El cliente envía la petición HTTP → llega primero a:", options: ["Base de datos", "Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Ruta" },
+      { before: "<span class='flow-step'>2</span> Luego el control se transfiere a:",                    options: ["Base de datos", "Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Controlador" },
+      { before: "<span class='flow-step'>3</span> Que invoca la lógica de negocio en:",                  options: ["Base de datos", "Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Servicio" },
+      { before: "<span class='flow-step'>4</span> Que solicita el acceso a los datos a:",                options: ["Base de datos", "Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Repositorio" },
+      { before: "<span class='flow-step'>5</span> Que ejecuta la consulta sobre:",                       options: ["Base de datos", "Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Base de datos" },
+    ]
+  },
+
+  /* ─── 6. CASOS PRÁCTICOS — REFACTORIZAR app.js ─── */
+  {
+    type: "dropdown",
+    section: "Refactorizando app.js: ¿a qué capa lo moverías?",
+    instr: "Una tienda tiene toda su API en un único archivo <code>app.js</code> y la van a refactorizar por capas. Para cada fragmento de lógica, elige la capa a la que debe moverse.",
+    items: [
+      { before: "Indicar que <code>DELETE /productos/:id</code> sea atendido por la función <code>eliminarProducto</code> del controlador.",
+        options: ["Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Ruta" },
+      { before: "Agrupar en un solo archivo todos los endpoints del recurso <code>/pedidos</code>.",
+        options: ["Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Ruta" },
+      { before: "Tomar el <code>id</code> de <code>req.params</code>, llamar al servicio y responder con <code>res.status(200).json(...)</code>.",
+        options: ["Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Controlador" },
+      { before: "Responder al cliente con código <code>404</code> cuando el servicio indica que el producto no existe.",
+        options: ["Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Controlador" },
+      { before: "Validar que el precio de un producto sea mayor que cero antes de guardarlo.",
+        options: ["Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Servicio" },
+      { before: "Impedir que se cree un pedido si el producto no tiene unidades disponibles en stock.",
+        options: ["Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Servicio" },
+      { before: "Ejecutar <code>UPDATE productos SET stock = ? WHERE id = ?</code>.",
+        options: ["Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Repositorio" },
+      { before: "Consultar en la base de datos un cliente a partir de su número de documento.",
+        options: ["Controlador", "Repositorio", "Ruta", "Servicio"], correct: "Repositorio" },
+    ]
+  },
+
+  /* ─── 7. COMPLETAR CÓDIGO ─── */
+  {
+    type: "fill",
+    section: "Completa el código",
+    instr: "Escribe la palabra que falta en cada línea de código (solo la palabra, sin espacios).",
+    items: [
+      { before: "const router = express.", after: "();", hint: "crear el enrutador", answers: ["Router"], caseSensitive: true },
+      { before: "", after: " { obtenerTodos } from '../services/usuario.service.js';", hint: "traer una función de otro módulo", answers: ["import"], caseSensitive: true },
+      { before: "", after: " const obtenerUsuarios = async (req, res) => { ... };", hint: "hacer que el controlador pueda usarse desde la ruta", answers: ["export"], caseSensitive: true },
+      { before: "const usuarios = await ", after: "();", hint: "función del servicio que trae todos los usuarios", answers: ["obtenerTodos"], caseSensitive: true },
+      { before: "res.", after: "(usuarios);", hint: "responder al cliente en formato JSON", answers: ["json"], caseSensitive: true },
+      { before: "export ", after: " router;", hint: "exportación por defecto del archivo de rutas", answers: ["default"], caseSensitive: true },
+    ]
+  },
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════════════════════════════ */
+const state = {
+  group: null,
+  studentId: null,
+  studentName: null,
+  pendingActivities: [],
+  exercises: null,        // copia barajada por estudiante
+  responses: {},
+  deadline: null,
+  timerInterval: null,
+  submitted: false,
+  tabSwitches: 0,
+  examActive: false,
+  away: false,
+  blurTimer: null,
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   UTILIDADES
+══════════════════════════════════════════════════════════════════ */
+const el = id => document.getElementById(id);
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  el(id).classList.add('active');
+}
+function formatTime(s) {
+  s = Math.max(0, s);
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function norm(s) { return String(s ?? '').trim().replace(/\s+/g, ' '); }
+function stripTags(s) { return String(s).replace(/<[^>]*>/g, '').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim(); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* RNG con semilla: el orden barajado es estable por estudiante (sobrevive a recargas) */
+function seededRng(seedStr) {
+  let h = 1779033703 ^ seedStr.length;
+  for (let i = 0; i < seedStr.length; i++) { h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+  return function () {
+    h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909);
+    h ^= h >>> 16; return (h >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function prepareExercises(seed) {
+  const rng = seededRng(seed);
+  return EXERCISES.map(ex => {
+    if (ex.type === 'mcq') {
+      const questions = shuffle(ex.questions, rng).map(q => {
+        const opts = shuffle(q.options.map((o, i) => ({ o, i })), rng);
+        return { ...q, options: opts.map(x => x.o), correct: opts.findIndex(x => x.i === q.correct) };
+      });
+      return { ...ex, questions };
+    }
+    if (ex.type === 'match')      return { ...ex, left: shuffle(ex.left, rng), right: shuffle(ex.right, rng) };
+    if (ex.type === 'categorize') return { ...ex, items: shuffle(ex.items, rng) };
+    if (ex.type === 'dropdown' && !ex.flow) return { ...ex, items: shuffle(ex.items, rng) };
+    return ex;
+  });
+}
+
+function emptyResponses(exercises) {
+  const r = {};
+  exercises.forEach((ex, i) => {
+    if (ex.type === 'mcq')        r[i] = {};   // questionText -> optionText (independiente del orden)
+    if (ex.type === 'match')      r[i] = {};   // leftId -> rightId
+    if (ex.type === 'categorize') r[i] = {};   // itemId -> catId
+    if (ex.type === 'fill')       r[i] = {};   // itemIndex -> texto
+    if (ex.type === 'dropdown')   r[i] = {};   // before -> opción
+  });
+  return r;
+}
+
+function exItemCount(ex) {
+  if (ex.type === 'mcq')   return ex.questions.length;
+  if (ex.type === 'match') return ex.left.length;
+  return ex.items.length;
+}
+const TOTAL_ITEMS = EXERCISES.reduce((a, ex) => a + exItemCount(ex), 0);
+
+/* ══════════════════════════════════════════════════════════════════
+   PERSISTENCIA (reanudar si se recarga / cierra la página)
+══════════════════════════════════════════════════════════════════ */
+function storageKey() { return `exam_${EXAM_ID}_${state.group.key}_${state.studentId}`; }
+function saveSession() {
+  if (!state.studentId) return;
+  try {
+    localStorage.setItem(storageKey(), JSON.stringify({
+      deadline: state.deadline, responses: state.responses, tabSwitches: state.tabSwitches, submitted: state.submitted,
+      away: state.away,
+    }));
+  } catch (_) {}
+}
+function loadSession() {
+  try { return JSON.parse(localStorage.getItem(storageKey()) || 'null'); } catch (_) { return null; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   GRUPOS Y ESTUDIANTES
+══════════════════════════════════════════════════════════════════ */
+function renderGroups() {
+  el('group-grid').innerHTML = GROUPS.map((g, i) =>
+    `<button class="group-btn" data-i="${i}">${g.label}</button>`).join('');
+  el('group-grid').querySelectorAll('.group-btn').forEach(b => b.addEventListener('click', () => {
+    el('group-grid').querySelectorAll('.group-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.group = GROUPS[+b.dataset.i];
+    loadStudents();
+  }));
+}
+
+async function loadStudents() {
+  if (!state.group) return;
+  el('st-idle').style.display    = 'none';
+  el('st-loading').style.display = 'flex';
+  el('st-error').style.display   = 'none';
+  el('st-empty').style.display   = 'none';
+  el('st-ready').style.display   = 'none';
+  el('btn-start').disabled       = true;
+  const group = state.group;
+
+  try {
+    const res = await fetch(`${API_HOST}${group.token}/students`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (state.group !== group) return;   // cambió de grupo mientras cargaba
+
+    const studentMap = new Map();
+    for (const act of data.activities ?? []) {
+      for (const s of act.students ?? []) {
+        if (!studentMap.has(s.id)) studentMap.set(s.id, { name: s.name, activities: [] });
+        studentMap.get(s.id).activities.push({ id: act.id, name: act.name });
+      }
+    }
+
+    el('st-loading').style.display = 'none';
+    if (studentMap.size === 0) { el('st-empty').style.display = 'block'; return; }
+
+    const sel = el('sel-student');
+    sel.innerHTML = '<option value="">— Selecciona tu nombre —</option>';
+    [...studentMap.entries()]
+      .sort((a, b) => a[1].name.localeCompare(b[1].name, 'es'))
+      .forEach(([id, val]) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = val.name;
+        opt.dataset.activities = JSON.stringify(val.activities);
+        sel.appendChild(opt);
+      });
+
+    el('st-ready').style.display = 'block';
+    el('btn-start').disabled     = false;
+  } catch (err) {
+    if (state.group !== group) return;
+    el('st-loading').style.display = 'none';
+    el('st-error').style.display   = 'block';
+    el('st-error-msg').textContent = ` — ${err.message}`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PROGRESO
+══════════════════════════════════════════════════════════════════ */
+function answeredItemCount() {
+  let n = 0;
+  state.exercises.forEach((ex, i) => {
+    const r = state.responses[i];
+    if (ex.type === 'fill')  n += Object.values(r).filter(x => norm(x) !== '').length;
+    else                          n += Object.values(r).filter(x => x !== null && x !== '').length;
+  });
+  return n;
+}
+function updateProgress() {
+  const n = answeredItemCount();
+  el('cnt').textContent = n;
+  el('progress-bar').style.width = (n / TOTAL_ITEMS * 100) + '%';
+  saveSession();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RENDER EXAMEN
+══════════════════════════════════════════════════════════════════ */
+function renderExam() {
+  const container = el('exam-container');
+  container.innerHTML = '';
+  el('cnt-total').textContent = TOTAL_ITEMS;
+
+  state.exercises.forEach((ex, i) => {
+    const block = document.createElement('div');
+    block.style.marginBottom = '1.8rem';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `
+      <span class="section-pill">Actividad ${i + 1}</span>
+      <span class="section-title">${ex.section}</span>
+      <span class="section-pts">${exItemCount(ex)} ítems</span>`;
+    block.appendChild(header);
+
+    const instr = document.createElement('div');
+    instr.className = 'section-instr';
+    instr.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>${ex.instr}</span>`;
+    block.appendChild(instr);
+
+    const body = document.createElement('div');
+    body.className = 'card';
+    if (ex.type === 'mcq')        renderMCQ(ex, i, body);
+    if (ex.type === 'match')      renderMatch(ex, i, body);
+    if (ex.type === 'categorize') renderCategorize(ex, i, body);
+    if (ex.type === 'fill')       renderFill(ex, i, body);
+    if (ex.type === 'dropdown')   renderDropdown(ex, i, body);
+    block.appendChild(body);
+
+    container.appendChild(block);
+  });
+
+  const spacer = document.createElement('div');
+  spacer.style.height = '40px';
+  container.appendChild(spacer);
+  updateProgress();
+}
+
+/* ── MCQ ── */
+function renderMCQ(ex, exi, root) {
+  const resp = state.responses[exi];
+  ex.questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.innerHTML = `<div class="q-number">P${qi + 1}</div><div class="q-text">${q.text}</div>`;
+    if (q.code) {
+      const pre = document.createElement('pre');
+      pre.className = 'code-block';
+      pre.textContent = q.code;
+      card.appendChild(pre);
+    }
+    const ul = document.createElement('ul');
+    ul.className = 'options';
+    q.options.forEach((opt, oi) => {
+      const li = document.createElement('li');
+      const lbl = document.createElement('label');
+      const radio = document.createElement('input');
+      radio.type = 'radio'; radio.name = `ex${exi}-q${qi}`; radio.value = oi;
+      if (resp[q.text] === opt) { radio.checked = true; li.classList.add('selected'); card.classList.add('answered'); }
+      radio.addEventListener('change', () => {
+        resp[q.text] = opt;
+        ul.querySelectorAll('li').forEach(l => l.classList.remove('selected'));
+        li.classList.add('selected');
+        card.classList.add('answered');
+        updateProgress();
+      });
+      const span = document.createElement('span'); span.innerHTML = opt;
+      lbl.appendChild(radio); lbl.appendChild(span);
+      li.appendChild(lbl); ul.appendChild(li);
+    });
+    card.appendChild(ul);
+    root.appendChild(card);
+  });
+}
+
+/* ── MATCH ── */
+function renderMatch(ex, exi, root) {
+  const resp = state.responses[exi];
+  ex.left.forEach(l => {
+    const row = document.createElement('div');
+    row.className = 'dd-row';
+    const text = document.createElement('span');
+    text.className = 'dd-text';
+    text.innerHTML = l.text;
+    text.style.flex = '0 0 130px';
+    const sel = document.createElement('select');
+    sel.className = 'dd-select';
+    sel.style.flex = '1 1 240px';
+    sel.innerHTML = `<option value="">— elige el propósito —</option>` +
+      ex.right.map(r => `<option value="${r.id}">${escHtml(r.text)}</option>`).join('');
+    sel.value = resp[l.id] || '';
+    sel.addEventListener('change', () => {
+      if (sel.value) resp[l.id] = sel.value; else delete resp[l.id];
+      updateProgress();
+    });
+    row.appendChild(text); row.appendChild(sel);
+    root.appendChild(row);
+  });
+}
+
+/* ── CATEGORIZE (botones por ítem: funciona igual en PC y celular) ── */
+function renderCategorize(ex, exi, root) {
+  const resp = state.responses[exi];
+  ex.items.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    const text = document.createElement('div');
+    text.className = 'cat-text';
+    text.textContent = it.word;
+    const btns = document.createElement('div');
+    btns.className = 'cat-btns';
+    ex.categories.forEach(cat => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cat-btn' + (resp[it.id] === cat.id ? ' active' : '');
+      b.textContent = cat.label;
+      b.addEventListener('click', () => {
+        resp[it.id] = cat.id;
+        btns.querySelectorAll('.cat-btn').forEach(x => x.classList.toggle('active', x === b));
+        row.classList.add('answered');
+        updateProgress();
+      });
+      btns.appendChild(b);
+    });
+    if (resp[it.id]) row.classList.add('answered');
+    row.appendChild(text); row.appendChild(btns);
+    root.appendChild(row);
+  });
+}
+
+/* ── FILL (código) ── */
+function renderFill(ex, exi, root) {
+  const resp = state.responses[exi];
+  ex.items.forEach((it, idx) => {
+    const row = document.createElement('div');
+    row.className = 'fill-row';
+    const code = document.createElement('span');
+    code.className = 'fill-code';
+    const before = document.createElement('span'); before.textContent = it.before;
+    const input = document.createElement('input');
+    input.type = 'text'; input.className = 'fill-input'; input.autocomplete = 'off';
+    input.setAttribute('autocapitalize', 'off'); input.setAttribute('autocorrect', 'off'); input.setAttribute('spellcheck', 'false');
+    input.placeholder = '______';
+    input.value = resp[idx] || '';
+    input.addEventListener('input', () => { resp[idx] = input.value; updateProgress(); });
+    const after = document.createElement('span'); after.textContent = it.after;
+    code.appendChild(before); code.appendChild(input); code.appendChild(after);
+    const hint = document.createElement('span');
+    hint.style.cssText = 'color:var(--muted);font-size:.82rem;font-style:italic';
+    hint.textContent = `← ${it.hint}`;
+    row.appendChild(code); row.appendChild(hint);
+    root.appendChild(row);
+  });
+}
+
+/* ── DROPDOWN ── */
+function renderDropdown(ex, exi, root) {
+  const resp = state.responses[exi];
+  ex.items.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'dd-row';
+    const text = document.createElement('span');
+    text.className = 'dd-text';
+    text.innerHTML = it.before;
+    const sel = document.createElement('select');
+    sel.className = 'dd-select';
+    sel.innerHTML = '<option value="">— elige —</option>' + it.options.map(o => `<option value="${escHtml(o)}">${escHtml(o)}</option>`).join('');
+    sel.value = resp[it.before] || '';
+    sel.addEventListener('change', () => { resp[it.before] = sel.value; updateProgress(); });
+    row.appendChild(text); row.appendChild(sel);
+    root.appendChild(row);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CALIFICACIÓN
+══════════════════════════════════════════════════════════════════ */
+function gradeExercise(ex, exi) {
+  const r = state.responses[exi];
+  let earned = 0;
+  const detail = [];
+
+  if (ex.type === 'mcq') {
+    ex.questions.forEach(q => {
+      const right = q.options[q.correct];
+      const ok = r[q.text] === right;
+      if (ok) earned++;
+      detail.push({ ok, label: stripTags(q.text), your: r[q.text] != null ? stripTags(r[q.text]) : '(sin responder)', right: stripTags(right) });
+    });
+  }
+  if (ex.type === 'match') {
+    ex.left.forEach(l => {
+      const ok = r[l.id] === ex.answer[l.id];
+      if (ok) earned++;
+      const yourR = r[l.id] ? ex.right.find(x => x.id === r[l.id]) : null;
+      const rightR = ex.right.find(x => x.id === ex.answer[l.id]);
+      detail.push({ ok, label: stripTags(l.text), your: yourR ? yourR.text : '(sin emparejar)', right: rightR.text });
+    });
+  }
+  if (ex.type === 'categorize') {
+    const catLabel = id => ex.categories.find(c => c.id === id)?.label || '(sin ubicar)';
+    ex.items.forEach(it => {
+      const ok = r[it.id] === it.cat;
+      if (ok) earned++;
+      detail.push({ ok, label: escHtml(it.word), your: r[it.id] ? catLabel(r[it.id]) : '(sin ubicar)', right: catLabel(it.cat) });
+    });
+  }
+  if (ex.type === 'fill') {
+    ex.items.forEach((it, idx) => {
+      const val = norm(r[idx]).replace(/\(\)$/, '');
+      const ok = it.answers.some(a => it.caseSensitive ? a === val : a.toLowerCase() === val.toLowerCase());
+      if (ok) earned++;
+      detail.push({ ok, label: escHtml(`${it.before} ____ ${it.after}`), your: r[idx] ? escHtml(r[idx]) : '(vacío)', right: it.answers[0] });
+    });
+  }
+  if (ex.type === 'dropdown') {
+    ex.items.forEach(it => {
+      const ok = r[it.before] === it.correct;
+      if (ok) earned++;
+      detail.push({ ok, label: stripTags(it.before), your: r[it.before] || '(sin responder)', right: it.correct });
+    });
+  }
+  return { earned, max: exItemCount(ex), detail };
+}
+
+function calcGrade() {
+  let correct = 0;
+  const perExercise = state.exercises.map((ex, exi) => {
+    const g = gradeExercise(ex, exi);
+    correct += g.earned;
+    return { ex, ...g };
+  });
+  const rawGrade = correct / TOTAL_ITEMS * 5;
+  const penalty  = state.tabSwitches * PENALTY_PER_EXIT;
+  const grade    = Math.max(0, Math.round((rawGrade - penalty) * 10) / 10);
+  return { correct, total: TOTAL_ITEMS, rawGrade: Math.round(rawGrade * 10) / 10, penalty, grade, perExercise };
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TIMER
+══════════════════════════════════════════════════════════════════ */
+function secondsLeft() { return Math.ceil((state.deadline - Date.now()) / 1000); }
+function startTimer() {
+  const display = el('timer-display');
+  const tick = () => {
+    const s = secondsLeft();
+    display.textContent = formatTime(s);
+    display.className = s <= 60 ? 'danger' : s <= 300 ? 'warn' : '';
+    if (s <= 0) { clearInterval(state.timerInterval); submitExam('tiempo'); }
+  };
+  tick();
+  state.timerInterval = setInterval(tick, 1000);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   INICIO / REANUDAR
+══════════════════════════════════════════════════════════════════ */
+function beginExam() {
+  const sel = el('sel-student');
+  if (!sel.value) { alert('Por favor selecciona tu nombre para continuar.'); return; }
+  const opt = sel.options[sel.selectedIndex];
+  state.studentId         = sel.value;
+  state.studentName       = opt.text;
+  state.pendingActivities = JSON.parse(opt.dataset.activities || '[]');
+  state.exercises         = prepareExercises(`${EXAM_ID}|${state.studentId}`);
+
+  const saved = loadSession();
+  if (saved) {
+    state.responses   = saved.responses || emptyResponses(state.exercises);
+    state.deadline    = saved.deadline;
+    state.tabSwitches = saved.tabSwitches || 0;
+    if (saved.submitted) {
+      state.submitted = true;
+      showResults(calcGrade());
+      return;
+    }
+  } else {
+    state.responses = emptyResponses(state.exercises);
+    state.deadline  = Date.now() + DURATION_SECONDS * 1000;
+  }
+
+  el('app-header').querySelector('h1').textContent = `${state.studentName.split(' ')[0]} · Web II Backend · ${state.group.label}`;
+  el('timer-box').style.display = 'flex';
+  el('progress-bar-wrap').style.display = 'block';
+
+  renderExam();
+  showScreen('screen-exam');
+  window.scrollTo(0, 0);
+  document.body.classList.add('exam-protected');
+  state.examActive = true;
+  updateTabBadge();
+
+  if (saved) {
+    // Recargar o reabrir la página cuenta como salida. Si el navegador alcanzó a
+    // registrar la pestaña oculta al cerrar (saved.away), no se cuenta dos veces.
+    if (saved.away) {
+      el('exit-msg').innerHTML = `Se detectó que recargaste o cerraste la página del examen.<br><br>
+        Salidas registradas: <strong>${state.tabSwitches}</strong> · Penalización acumulada: <strong>−${(state.tabSwitches * PENALTY_PER_EXIT).toFixed(1)}</strong> puntos.`;
+      el('exit-overlay').classList.add('open');
+    } else {
+      registerExit('recarga');
+    }
+  }
+  saveSession();
+  if (secondsLeft() <= 0) { submitExam('tiempo'); return; }
+  startTimer();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ENVÍO Y RESULTADOS
+══════════════════════════════════════════════════════════════════ */
+function submitExam(reason) {
+  if (state.submitted) return;
+  state.submitted  = true;
+  state.examActive = false;
+  clearInterval(state.timerInterval);
+  clearTimeout(state.blurTimer);
+  document.body.classList.remove('exam-protected');
+  el('modal-overlay').classList.remove('open');
+  el('exit-overlay').classList.remove('open');
+  saveSession();
+  const result = calcGrade();
+  result.reason = reason;
+  showResults(result);
+}
+
+function showResults(result) {
+  el('submit-bar').style.display = 'none';
+  el('timer-box').style.display = 'none';
+  el('progress-bar-wrap').style.display = 'none';
+  showScreen('screen-results');
+  window.scrollTo(0, 0);
+
+  const ring = el('score-ring');
+  ring.textContent = result.grade.toFixed(1);
+  ring.className = 'score-ring ' + (result.grade >= 4.0 ? 'great' : result.grade >= 3.0 ? 'pass' : 'fail');
+
+  el('result-title').textContent = result.grade >= 3.0 ? '¡Examen aprobado!' : 'Examen no aprobado';
+  const reasonTxt = result.reason === 'tiempo' ? ' · Enviado por tiempo agotado'
+                  : result.reason === 'salidas' ? ' · Enviado por exceso de salidas' : '';
+  el('result-subtitle').textContent = `${state.studentName} · ${state.group.label} · Programación Web II Backend${reasonTxt}`;
+
+  const tabCls = state.tabSwitches === 0 ? 'green' : state.tabSwitches <= 2 ? 'orange' : 'red';
+  const stats = [
+    { label: 'Nota final',      value: result.grade.toFixed(1) + ' / 5.0', cls: result.grade >= 3.0 ? 'green' : 'red' },
+    { label: 'Nota sin penalización', value: result.rawGrade.toFixed(1), cls: 'blue' },
+    { label: 'Correctas',       value: `${result.correct} / ${result.total}`, cls: 'green' },
+    { label: 'Salidas',         value: state.tabSwitches === 0 ? '0 ✔' : `${state.tabSwitches} ⚠`, cls: tabCls },
+    { label: 'Penalización',    value: result.penalty > 0 ? `−${result.penalty.toFixed(1)}` : '0', cls: result.penalty > 0 ? 'red' : 'green' },
+  ];
+  el('results-grid').innerHTML = stats.map(s => `<div class="results-stat"><div class="label">${s.label}</div><div class="value ${s.cls}">${s.value}</div></div>`).join('');
+
+  el('review-list').innerHTML = result.perExercise.map((pe, i) => {
+    const rows = pe.detail.map(d => `
+      <div class="review-item ${d.ok ? 'ok' : 'fail'}">
+        <span class="review-icon">${d.ok ? '✔' : '✘'}</span>
+        <div class="review-text">
+          <div class="q">${d.label.length > 140 ? d.label.slice(0, 140) + '…' : d.label}</div>
+          <div class="ans">Tu respuesta: <em>${d.your}</em>${!d.ok ? ` · Correcta: <strong>${d.right}</strong>` : ''}</div>
+        </div>
+      </div>`).join('');
+    return `<div style="margin-bottom:1.2rem">
+      <div style="font-weight:700;color:var(--primary);margin-bottom:.5rem">
+        Actividad ${i + 1}: ${stripTags(pe.ex.section)} <span style="color:var(--muted);font-weight:500">— ${pe.earned}/${pe.max}</span>
+      </div>${rows}</div>`;
+  }).join('');
+
+  reportGrade(result.grade);
+}
+
+async function reportGrade(grade) {
+  const statusEl = el('api-status');
+  statusEl.className = 'sending';
+  statusEl.textContent = 'Reportando nota en e-notes…';
+  const submitUrl = `${API_HOST}${state.group.token}/submit`;
+
+  if (!state.pendingActivities.length) {
+    statusEl.className = 'error';
+    statusEl.innerHTML = `⚠ No hay actividades pendientes para reportar. Nota obtenida: <strong>${grade.toFixed(1)} / 5.0</strong>`;
+    return;
+  }
+
+  const results = await Promise.allSettled(
+    state.pendingActivities.map(act =>
+      fetch(submitUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ studentId: state.studentId, activityId: act.id, score: grade })
+      }).then(async res => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        return { name: act.name, skipped: data.skipped === true };
+      })
+    )
+  );
+
+  const sent    = results.filter(r => r.status === 'fulfilled' && !r.value.skipped).map(r => r.value.name);
+  const skipped = results.filter(r => r.status === 'fulfilled' &&  r.value.skipped).map(r => r.value.name);
+  const failed  = results.filter(r => r.status === 'rejected');
+
+  if (failed.length === 0) {
+    statusEl.className = 'success';
+    let html = '';
+    if (sent.length)    html += `✔ Nota <strong>${grade.toFixed(1)}</strong> registrada en: ${sent.map(escHtml).join(', ')}.<br>`;
+    if (skipped.length) html += `ℹ Ya tenía nota registrada en: ${skipped.map(escHtml).join(', ')} (no se modificó).`;
+    statusEl.innerHTML = html || '✔ Nota reportada.';
+  } else {
+    const payloads = state.pendingActivities.map(act =>
+      JSON.stringify({ studentId: state.studentId, activityId: act.id, score: grade })).join('\n');
+    statusEl.className = 'error';
+    statusEl.innerHTML =
+      `⚠ No se pudo reportar la nota automáticamente. Toma captura de esta pantalla y avisa al docente.<br>
+       <small>Error: ${escHtml(failed[0].reason?.message || '')}</small><br><br>
+       <strong>Nota obtenida: ${grade.toFixed(1)} / 5.0</strong> (${state.group.label})<br>
+       <small>Datos para reporte manual:</small><br>
+       <code style="font-size:.78rem;word-break:break-all;white-space:pre-wrap">${escHtml(payloads)}</code><br>
+       <button class="btn btn-danger" style="margin-top:.7rem;padding:.45rem 1.2rem;font-size:.88rem" onclick="reportGrade(${grade})">Reintentar envío</button>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   EVENT LISTENERS
+══════════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderGroups();
+  el('rule-penalty').textContent   = PENALTY_PER_EXIT.toFixed(1);
+  el('rule-max-exits').textContent = MAX_EXITS;
+
+  el('sel-student').addEventListener('change', function () {
+    const opt = this.options[this.selectedIndex];
+    if (!opt.dataset.activities) return;
+    const names = JSON.parse(opt.dataset.activities).map(a => `<strong>${escHtml(a.name)}</strong>`).join(' y ');
+    el('notice-activities').innerHTML = `La nota se registrará automáticamente en: ${names}.`;
+  });
+  el('btn-start').addEventListener('click', beginExam);
+
+  el('btn-submit').addEventListener('click', () => {
+    const pending = TOTAL_ITEMS - answeredItemCount();
+    el('modal-msg').innerHTML = pending > 0
+      ? `Tienes <strong>${pending} ítem(s) sin responder</strong>. ¿Deseas enviar de todas formas?`
+      : '¿Estás seguro/a de enviar el examen? No podrás cambiar tus respuestas.';
+    el('modal-overlay').classList.add('open');
+  });
+  el('modal-cancel').addEventListener('click', () => el('modal-overlay').classList.remove('open'));
+  el('modal-confirm').addEventListener('click', () => submitExam('manual'));
+  el('modal-overlay').addEventListener('click', e => { if (e.target === el('modal-overlay')) el('modal-overlay').classList.remove('open'); });
+  el('exit-ok').addEventListener('click', () => el('exit-overlay').classList.remove('open'));
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   ANTI-TRAMPA
+══════════════════════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg, isWarn = false) {
+  const t = el('cheat-toast');
+  t.textContent = msg;
+  t.classList.toggle('warn-color', isWarn);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function updateTabBadge() {
+  const badge = el('tab-badge');
+  if (state.tabSwitches === 0) { badge.textContent = '✔ Sin salidas'; badge.className = 'tab-switch-badge none'; return; }
+  badge.textContent = `⚠ ${state.tabSwitches} salida(s) · −${(state.tabSwitches * PENALTY_PER_EXIT).toFixed(1)}`;
+  badge.className = 'tab-switch-badge ' + (state.tabSwitches >= 3 ? 'high' : 'low');
+}
+
+function registerExit(kind) {
+  if (!state.examActive || state.submitted) return;
+  state.tabSwitches++;
+  updateTabBadge();
+  saveSession();
+  if (state.tabSwitches >= MAX_EXITS) {
+    submitExam('salidas');
+    return;
+  }
+  const restantes = MAX_EXITS - state.tabSwitches;
+  el('exit-msg').innerHTML =
+    `${kind === 'recarga' ? 'Se detectó que recargaste o cerraste la página del examen.' : 'Se detectó que saliste de la pantalla del examen.'}<br><br>
+     Salidas registradas: <strong>${state.tabSwitches}</strong> · Penalización acumulada: <strong>−${(state.tabSwitches * PENALTY_PER_EXIT).toFixed(1)}</strong> puntos.<br>
+     Si sales <strong>${restantes}</strong> vez${restantes > 1 ? 'es' : ''} más, el examen se enviará automáticamente.`;
+  el('exit-overlay').classList.add('open');
+}
+
+// Cambiar de pestaña / minimizar
+document.addEventListener('visibilitychange', () => {
+  if (!state.examActive || state.submitted) return;
+  if (document.hidden) {
+    clearTimeout(state.blurTimer);
+    if (!state.away) { state.away = true; registerExit('pestaña'); }
+  } else {
+    state.away = false;
+    saveSession();
+  }
+});
+// Cambiar a otra aplicación o ventana (la pestaña sigue visible)
+window.addEventListener('blur', () => {
+  if (!state.examActive || state.submitted || state.away) return;
+  clearTimeout(state.blurTimer);
+  state.blurTimer = setTimeout(() => {
+    if (!document.hasFocus() && !state.away) { state.away = true; registerExit('ventana'); }
+  }, BLUR_GRACE_MS);
+});
+window.addEventListener('focus', () => {
+  clearTimeout(state.blurTimer);
+  if (!document.hidden && state.away) { state.away = false; saveSession(); }
+});
+
+window.addEventListener('beforeunload', e => {
+  if (!state.examActive || state.submitted) return;
+  saveSession();
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+document.addEventListener('contextmenu', e => {
+  if (!state.examActive) return;
+  e.preventDefault();
+  showToast('⛔ Clic derecho deshabilitado durante el examen.');
+});
+['copy', 'cut', 'paste', 'drop'].forEach(evt => {
+  document.addEventListener(evt, e => {
+    if (!state.examActive) return;
+    e.preventDefault();
+    showToast('⛔ Copiar/pegar deshabilitado durante el examen.');
+  }, true);
+});
+document.addEventListener('keydown', e => {
+  if (!state.examActive) return;
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && ['c','x','v','a','p','s','u'].includes(k)) {
+    e.preventDefault();
+    showToast('⛔ Atajo de teclado deshabilitado durante el examen.');
+  }
+  if (k === 'f12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c'].includes(k))) {
+    e.preventDefault();
+  }
+});
+</script>
+</body>
+</html>
