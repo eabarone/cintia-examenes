@@ -4,168 +4,289 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Exámenes Virtuales | Unicor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg:       #0d0d1a;
-      --card:     rgba(255,255,255,0.06);
-      --border:   rgba(255,255,255,0.1);
-      --text:     #f0f0ff;
-      --muted:    rgba(255,255,255,0.45);
-      --purple:   #7C3AED;
-      --purple-l: #a78bfa;
-      --pink:     #ec4899;
-      --teal:     #06b6d4;
-      --green:    #10b981;
-    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #f3f5f4;
+      --card:    #ffffff;
+      --text:    #18201e;
+      --muted:   #66706d;
+      --border:  #dfe5e3;
+      --tecnico: #0f5e56;
+      --tecnico-soft: #e7f3f1;
+      --sistemas: #2f4a8a;
+      --sistemas-soft: #e9eef8;
+      --accent:  var(--tecnico);
+      --accent-soft: var(--tecnico-soft);
+      --radius:  12px;
+      --font:    'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    body[data-program="sistemas"] { --accent: var(--sistemas); --accent-soft: var(--sistemas-soft); }
+
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: var(--font);
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
-      background-image:
-        radial-gradient(ellipse at top left,    rgba(124,58,237,.15) 0%, transparent 55%),
-        radial-gradient(ellipse at bottom right, rgba(6,182,212,.12)  0%, transparent 55%);
+      line-height: 1.55;
     }
 
-    .logo {
-      color: var(--muted);
-      font-size: .8rem;
-      font-weight: 700;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      margin-bottom: 1.4rem;
-    }
-
-    h1 {
-      font-size: clamp(1.8rem, 5vw, 2.6rem);
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--purple-l), var(--pink));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-align: center;
-      margin-bottom: .5rem;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: .95rem;
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.4rem;
-      width: 100%;
-      max-width: 680px;
-    }
-
-    .card {
-      position: relative;
-      overflow: hidden;
+    .top {
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 2.4rem 2rem;
-      text-decoration: none;
-      color: var(--text);
-      cursor: pointer;
-      transition: transform .25s, border-color .25s;
-      text-align: center;
-      display: block;
+      border-bottom: 1px solid var(--border);
     }
-    .card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      border-radius: 22px;
-      transition: opacity .3s;
+    .top-inner {
+      max-width: 880px; margin: 0 auto; padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: .75rem;
     }
-    .card.tecnico::after  { background: linear-gradient(135deg, rgba(124,58,237,.28), rgba(236,72,153,.2)); }
-    .card.sistemas::after { background: linear-gradient(135deg, rgba(6,182,212,.25),  rgba(16,185,129,.2)); }
+    .brand-mark {
+      width: 34px; height: 34px; border-radius: 8px; background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .2s;
+    }
+    .brand-title { font-weight: 700; font-size: 1rem; }
+    .brand-sub { font-size: .8rem; color: var(--muted); }
 
-    .card:hover { transform: translateY(-7px); border-color: rgba(255,255,255,.22); }
-    .card:hover::after { opacity: 1; }
+    main { max-width: 880px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
 
-    .card .icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
-      position: relative;
-      z-index: 1;
+    /* ── pasos ── */
+    .steps { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1.75rem; list-style: none; }
+    .step {
+      display: flex; align-items: center; gap: .45rem; font-size: .85rem; color: var(--muted);
+      background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: .3rem .8rem .3rem .35rem;
     }
-    .card .icon svg { width: 3rem; height: 3rem; stroke-width: 1.5; }
-    .card h2 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      position: relative;
-      z-index: 1;
-      margin-bottom: .4rem;
+    .step .n {
+      width: 22px; height: 22px; border-radius: 50%; background: var(--border); color: var(--muted);
+      display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700;
     }
-    .card p {
-      color: var(--muted);
-      font-size: .84rem;
-      line-height: 1.5;
-      position: relative;
-      z-index: 1;
-    }
-    .badge {
-      display: inline-block;
-      margin-top: 1rem;
-      padding: .28rem 1rem;
-      border-radius: 100px;
-      font-size: .78rem;
-      font-weight: 600;
-      position: relative;
-      z-index: 1;
-    }
-    .card.tecnico  .badge { background: rgba(124,58,237,.3); color: var(--purple-l); }
-    .card.sistemas .badge { background: rgba(6,182,212,.25); color: #67e8f9; }
+    .step.done { cursor: pointer; color: var(--text); }
+    .step.done:hover { border-color: var(--accent); }
+    .step.done .n { background: var(--accent-soft); color: var(--accent); }
+    .step.current { border-color: var(--accent); color: var(--text); font-weight: 600; }
+    .step.current .n { background: var(--accent); color: #fff; }
+    .step .val { font-weight: 600; }
 
-    footer {
-      margin-top: 3rem;
-      color: var(--muted);
-      font-size: .78rem;
-      text-align: center;
+    h1 { font-size: clamp(1.4rem, 3.5vw, 1.85rem); font-weight: 700; margin-bottom: .3rem; letter-spacing: -.01em; }
+    .lead { color: var(--muted); margin-bottom: 1.5rem; }
+
+    .back {
+      display: inline-flex; align-items: center; gap: .35rem; background: none; border: none; font-family: inherit;
+      color: var(--muted); font-size: .9rem; cursor: pointer; margin-bottom: 1rem; padding: .2rem 0;
+    }
+    .back:hover { color: var(--text); }
+
+    /* ── tarjetas ── */
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+    .option {
+      display: flex; flex-direction: column; gap: .35rem; text-align: left; text-decoration: none; color: inherit;
+      background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.3rem;
+      cursor: pointer; font-family: inherit; font-size: 1rem; transition: border-color .15s, box-shadow .15s, transform .15s;
+    }
+    .option:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(0,0,0,.06); transform: translateY(-2px); }
+    .option:focus-visible { outline: 3px solid var(--accent-soft); border-color: var(--accent); }
+    .option .icon {
+      width: 42px; height: 42px; border-radius: 10px; background: var(--accent-soft); color: var(--accent);
+      display: flex; align-items: center; justify-content: center; margin-bottom: .5rem;
+    }
+    .option.tecnico  .icon { background: var(--tecnico-soft);  color: var(--tecnico); }
+    .option.sistemas .icon { background: var(--sistemas-soft); color: var(--sistemas); }
+    .option.tecnico:hover  { border-color: var(--tecnico); }
+    .option.sistemas:hover { border-color: var(--sistemas); }
+    .option h2 { font-size: 1.08rem; font-weight: 700; line-height: 1.3; }
+    .option p { font-size: .88rem; color: var(--muted); }
+    .option .foot { margin-top: auto; padding-top: .75rem; display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .82rem; color: var(--muted); }
+    .option .go { color: var(--accent); font-weight: 600; white-space: nowrap; }
+
+    .semester-num { font-size: 2rem; font-weight: 700; color: var(--accent); line-height: 1; }
+
+    .tag {
+      display: inline-block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      padding: .15rem .55rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); align-self: flex-start;
+    }
+    .tag.recuperacion { background: #fdf0e6; color: #a4520f; }
+
+    .empty { background: var(--card); border: 1px dashed var(--border); border-radius: var(--radius); padding: 1.5rem; color: var(--muted); text-align: center; }
+
+    footer { text-align: center; color: var(--muted); font-size: .78rem; padding: 0 1rem 2rem; }
+
+    @media (max-width: 520px) {
+      main { padding-top: 1.5rem; }
+      .grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-<body>
+<body data-program="">
 
-  <div class="logo">🎓 Unicor · Exámenes Virtuales</div>
-  <h1>Plataforma de Evaluación</h1>
-  <p class="subtitle">Selecciona el programa al que perteneces</p>
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">Exámenes Virtuales</div>
+        <div class="brand-sub">Universidad de Córdoba</div>
+      </div>
+    </div>
+  </header>
 
-  <div class="grid">
-    <a class="card tecnico" href="tecnico/">
-      <span class="icon"><i data-lucide="graduation-cap"></i></span>
-      <h2>Técnico Profesional</h2>
-      <p>Accede a las actividades virtuales de tu programa</p>
-      <span class="badge">Ver materias</span>
-    </a>
-
-    <a class="card sistemas" href="sistemas/">
-      <span class="icon"><i data-lucide="monitor"></i></span>
-      <h2>Ingeniería de Sistemas</h2>
-      <p>Accede a las actividades virtuales de tu programa</p>
-      <span class="badge">Ver materias</span>
-    </a>
-  </div>
+  <main>
+    <ol class="steps" id="steps"></ol>
+    <div id="view"></div>
+  </main>
 
   <footer>eNotes · Integración externa — 2026</footer>
 
+<script>
+/* ════════════════════════════════════════════════════════
+   CATÁLOGO — para agregar un examen, añádelo al semestre
+   ════════════════════════════════════════════════════════ */
+const ICONS = {
+  cap:      '<path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>',
+  code:     '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  monitor:  '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/>',
+  globe:    '<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/>',
+  server:   '<rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/>',
+  lang:     '<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+  coffee:   '<path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/>',
+};
+const icon = name => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
 
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>lucide.createIcons();</script>
+const PROGRAMS = [
+  {
+    id: 'tecnico',
+    name: 'Técnico Profesional en Programación Web',
+    short: 'Técnico Profesional',
+    icon: 'code',
+    semesters: [
+      {
+        number: 2,
+        exams: [
+          { title: 'Base de Datos', desc: 'Modelo Entidad-Relación, DDL y DML', tag: 'Quiz', icon: 'database', href: 'tecnico/index.html?curso=db' },
+          { title: 'Programación Web II', desc: 'Node.js, npm y Express', tag: 'Quiz', icon: 'globe', href: 'tecnico/index.html?curso=web2' },
+          { title: 'Inglés II', desc: 'Tech Jobs, Comparatives & Tech Trends', tag: 'Recuperación', icon: 'lang', href: 'tecnico/ingles-2/examen-recuperacion/index.html' },
+        ],
+      },
+      {
+        number: 3,
+        exams: [
+          { title: 'Programación Web II Backend', desc: 'Rutas, controladores, servicios y repositorios', tag: 'Parcial Unidad 1', icon: 'server', href: 'tecnico/web2-backend/parcial-unidad-1/index.html' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sistemas',
+    name: 'Ingeniería de Sistemas',
+    short: 'Ingeniería de Sistemas',
+    icon: 'monitor',
+    semesters: [
+      {
+        number: 4,
+        exams: [
+          { title: 'Programación III', desc: 'POO, herencia, interfaces, lambdas y patrones de diseño (Java)', tag: 'Recuperación', icon: 'coffee', href: 'sistemas/programacion-3/examen-recuperacion/index.html' },
+        ],
+      },
+    ],
+  },
+];
+
+/* ════════════════════════════════════════════════════════
+   NAVEGACIÓN (#programa/semestre)
+   ════════════════════════════════════════════════════════ */
+const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function parseHash() {
+  const [p, s] = location.hash.replace(/^#\/?/, '').split('/');
+  const program = PROGRAMS.find(x => x.id === p) || null;
+  const semester = program && program.semesters.find(x => String(x.number) === s) || null;
+  return { program, semester };
+}
+
+function renderSteps(program, semester) {
+  const steps = [
+    { label: 'Programa', val: program && program.short, hash: '' },
+    { label: 'Semestre', val: semester && `${semester.number}.º`, hash: program ? `#${program.id}` : null },
+    { label: 'Examen', val: null, hash: null },
+  ];
+  const current = !program ? 0 : !semester ? 1 : 2;
+  document.getElementById('steps').innerHTML = steps.map((st, i) => {
+    const cls = i < current ? 'done' : i === current ? 'current' : '';
+    return `<li class="step ${cls}" ${i < current ? `data-hash="${st.hash}" role="link" tabindex="0"` : ''}>
+      <span class="n">${i + 1}</span>${st.label}${st.val && i < current ? `: <span class="val">${esc(st.val)}</span>` : ''}
+    </li>`;
+  }).join('');
+  document.querySelectorAll('.step.done').forEach(li => {
+    const go = () => { location.hash = li.dataset.hash; };
+    li.addEventListener('click', go);
+    li.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  });
+}
+
+function render() {
+  const { program, semester } = parseHash();
+  document.body.dataset.program = program ? program.id : '';
+  renderSteps(program, semester);
+  const view = document.getElementById('view');
+
+  if (!program) {
+    view.innerHTML = `
+      <h1>¿A qué programa perteneces?</h1>
+      <p class="lead">Selecciona tu programa académico para ver los exámenes disponibles.</p>
+      <div class="grid">
+        ${PROGRAMS.map(p => {
+          const total = p.semesters.reduce((a, s) => a + s.exams.length, 0);
+          return `<a class="option ${p.id}" href="#${p.id}">
+            <span class="icon">${icon(p.icon)}</span>
+            <h2>${esc(p.name)}</h2>
+            <div class="foot"><span>${plural(total, 'examen disponible', 'exámenes disponibles')}</span><span class="go">Continuar →</span></div>
+          </a>`;
+        }).join('')}
+      </div>`;
+  } else if (!semester) {
+    view.innerHTML = `
+      <button class="back" data-hash="">← Programas</button>
+      <h1>${esc(program.name)}</h1>
+      <p class="lead">¿En qué semestre estás?</p>
+      <div class="grid">
+        ${program.semesters.map(s => `
+          <a class="option" href="#${program.id}/${s.number}">
+            <span class="semester-num">${s.number}.º</span>
+            <h2>Semestre ${s.number}</h2>
+            <p>${s.exams.map(e => esc(e.title)).join(' · ')}</p>
+            <div class="foot"><span>${plural(s.exams.length, 'examen', 'exámenes')}</span><span class="go">Ver exámenes →</span></div>
+          </a>`).join('')}
+      </div>`;
+  } else {
+    view.innerHTML = `
+      <button class="back" data-hash="#${program.id}">← Semestres</button>
+      <h1>${semester.number}.º semestre</h1>
+      <p class="lead">${esc(program.name)} · Selecciona el examen que vas a presentar.</p>
+      ${semester.exams.length ? `<div class="grid">
+        ${semester.exams.map(e => `
+          <a class="option" href="${e.href}">
+            <span class="icon">${icon(e.icon)}</span>
+            <span class="tag ${/recuperaci/i.test(e.tag) ? 'recuperacion' : ''}">${esc(e.tag)}</span>
+            <h2>${esc(e.title)}</h2>
+            <p>${esc(e.desc)}</p>
+            <div class="foot"><span></span><span class="go">Ingresar →</span></div>
+          </a>`).join('')}
+      </div>` : `<div class="empty">No hay exámenes disponibles para este semestre.</div>`}`;
+  }
+
+  view.querySelectorAll('.back').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.hash) location.hash = b.dataset.hash;
+    else history.pushState('', document.title, location.pathname + location.search), render();
+  }));
+  window.scrollTo(0, 0);
+}
+
+window.addEventListener('hashchange', render);
+render();
+</script>
 </body>
 </html>

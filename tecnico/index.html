@@ -307,7 +307,7 @@
 </head>
 <body>
 
-<a class="back-home" href="../">← Inicio</a>
+<a class="back-home" href="../index.html#tecnico/2">← Inicio</a>
 
 <!-- ═══════════════════════════ SCREEN 1: COURSE SELECTION ═══════════════════════════ -->
 <div class="screen active" id="s-courses">
@@ -328,7 +328,7 @@
         <p>Node.js, npm y Express</p>
         <span class="badge">10 preguntas</span>
       </div>
-      <div class="course-card eng" onclick="location.href='ingles-2/examen-recuperacion/'">
+      <div class="course-card eng" onclick="location.href='ingles-2/examen-recuperacion/index.html'">
         <span class="icon"><i data-lucide="languages"></i></span>
         <h2>Inglés II</h2>
         <p>Tech Jobs, Comparatives &amp; Tech Trends</p>
@@ -341,7 +341,7 @@
 <!-- ═══════════════════════════ SCREEN 2: GROUP SELECTION ═══════════════════════════ -->
 <div class="screen" id="s-groups">
   <div class="courses-wrap">
-    <button class="back-btn" onclick="show('s-courses')" style="justify-content:center;margin-bottom:1.5rem">← Volver</button>
+    <button class="back-btn" onclick="location.href='../index.html#tecnico/2'" style="justify-content:center;margin-bottom:1.5rem">← Volver</button>
     <h1 id="grp-title">Base de Datos</h1>
     <p class="subtitle">Selecciona tu grupo</p>
     <div class="courses-grid" id="grp-grid" style="margin-top:2rem"></div>
@@ -1137,7 +1137,7 @@ function restart() {
   el('st-search').value = '';
   el('no-attempts-box').style.display = 'none';
   el('st-content').style.display      = 'none';
-  show('s-courses');
+  location.href = '../index.html#tecnico/2';
 }
 
 /* ════════════════════════════════════════════════════════
@@ -1146,6 +1146,14 @@ function restart() {
 const el  = id => document.getElementById(id);
 const esc = s  => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const initials = name => name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+
+/* La selección de programa y semestre se hace en la página de inicio (../):
+   esta página abre directamente el curso indicado en ?curso=db|web2 */
+(function openCourseFromUrl() {
+  const curso = new URLSearchParams(location.search).get('curso');
+  if (CFG.courses[curso]) selectCourse(curso);
+  else location.replace('../index.html#tecnico');
+})();
 </script>
 
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
