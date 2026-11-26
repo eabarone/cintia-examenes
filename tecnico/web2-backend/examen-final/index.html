@@ -223,7 +223,11 @@
     .modal { background: #fff; border-radius: var(--radius); padding: 2rem; max-width: 440px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
     .modal h3 { font-size: 1.1rem; margin-bottom: .75rem; color: var(--primary); }
     .modal p  { font-size: .93rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
-    .modal-buttons { display: flex; gap: .75rem; justify-content: flex-end; }
+    .modal-buttons { display: flex; gap: .75rem; justify-content: flex-end; flex-wrap: wrap; }
+    .modal-buttons .btn { padding: .75rem 1.4rem; font-size: .95rem; }
+    @media (max-width: 440px) { .modal-buttons .btn { flex: 1 1 100%; } }
+    .btn-ghost-danger { background: transparent; border: 1.5px solid #f3bdb5; color: var(--danger); }
+    .btn-ghost-danger:hover:not(:disabled) { background: #fff5f5; border-color: var(--danger); }
 
     .notice-info { display: flex; gap: .65rem; align-items: flex-start; background: var(--soft); border: 1px solid var(--soft-b); border-radius: 8px; padding: .85rem 1rem; font-size: .88rem; color: #0f5e56; line-height: 1.55; }
 
@@ -311,12 +315,16 @@
       </div>
 
       <div id="st-ready" style="display:none">
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:.6rem">
           <label for="sel-student">Estudiante</label>
           <select id="sel-student">
             <option value="">— Selecciona tu nombre —</option>
           </select>
         </div>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:1.1rem">
+          ¿No aparece tu nombre? Es porque esta actividad ya tiene una nota registrada a tu nombre.
+          Si necesitas presentarla de nuevo, habla con la docente.
+        </p>
         <div class="notice-info">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <span id="notice-activities">La nota obtenida se registrará automáticamente en la actividad pendiente.</span>
@@ -334,6 +342,7 @@
         <li class="warn-rule">Cada salida de la pantalla del examen (cambiar de pestaña, minimizar, abrir otra aplicación o recargar) <strong>descuenta <span id="rule-penalty">0.2</span> puntos</strong> de la nota final.</li>
         <li class="warn-rule">Al llegar a <strong><span id="rule-max-exits">5</span> salidas</strong> el examen se envía automáticamente.</li>
         <li>Una vez enviado <strong>no podrás modificar tus respuestas</strong>. La nota se reporta automáticamente a e-notes.</li>
+        <li>Si lo enviaste <strong>por error</strong>, avisa a la docente: al retirar la nota en e-notes quedas habilitado para un nuevo intento.</li>
         <li>Temas: qué es la nube · IaaS, PaaS y SaaS · nube vs. on-premise · región del centro de datos y latencia · Postgres administrado (Neon) · cadena de conexión y variables de entorno.</li>
       </ul>
     </div>
@@ -384,8 +393,8 @@
     <h3>¿Enviar examen?</h3>
     <p id="modal-msg">Una vez enviado no podrás cambiar tus respuestas. ¿Estás seguro/a de continuar?</p>
     <div class="modal-buttons">
-      <button class="btn btn-outline" id="modal-cancel">Cancelar</button>
-      <button class="btn btn-danger"  id="modal-confirm">Sí, enviar</button>
+      <button class="btn btn-primary" id="modal-cancel">Seguir respondiendo</button>
+      <button class="btn btn-ghost-danger" id="modal-confirm">Sí, enviar</button>
     </div>
   </div>
 </div>
@@ -674,6 +683,7 @@ const state = {
   deadline: null,
   timerInterval: null,
   submitted: false,
+  intento: 1,
   tabSwitches: 0,
   examActive: false,
   away: false,
@@ -757,7 +767,7 @@ function saveSession() {
   try {
     localStorage.setItem(storageKey(), JSON.stringify({
       deadline: state.deadline, responses: state.responses, tabSwitches: state.tabSwitches, submitted: state.submitted,
-      away: state.away,
+      away: state.away, intento: state.intento,
     }));
   } catch (_) {}
 }
@@ -1116,24 +1126,31 @@ function beginExam() {
   state.studentId         = sel.value;
   state.studentName       = opt.text;
   state.pendingActivities = JSON.parse(opt.dataset.activities || '[]');
-  state.exercises         = prepareExercises(`${EXAM_ID}|${state.studentId}`);
 
-  const saved = loadSession();
-  if (saved) {
+  // Quien aparece en la lista es porque e-notes no le tiene nota registrada:
+  // e-notes es la autoridad. Lo guardado aquí solo sirve para reanudar un
+  // intento en curso; un intento ya enviado NO bloquea uno nuevo. Para
+  // autorizar un reintento basta con borrar la nota del estudiante en e-notes.
+  const saved    = loadSession();
+  const reanudar = !!saved && !saved.submitted;
+  const previos  = (saved && saved.intento) ? saved.intento : 0;
+
+  state.intento   = reanudar ? (previos || 1) : previos + 1;
+  state.submitted = false;
+  state.exercises = prepareExercises(`${EXAM_ID}|${state.studentId}|${state.intento}`);
+
+  if (reanudar) {
     state.responses   = saved.responses || emptyResponses(state.exercises);
     state.deadline    = saved.deadline;
     state.tabSwitches = saved.tabSwitches || 0;
-    if (saved.submitted) {
-      state.submitted = true;
-      showResults(calcGrade());
-      return;
-    }
   } else {
-    state.responses = emptyResponses(state.exercises);
-    state.deadline  = Date.now() + DURATION_SECONDS * 1000;
+    state.responses   = emptyResponses(state.exercises);
+    state.deadline    = Date.now() + DURATION_SECONDS * 1000;
+    state.tabSwitches = 0;
   }
 
-  el('app-header').querySelector('h1').textContent = `${state.studentName.split(' ')[0]} · Examen Final · ${state.group.label}`;
+  const intentoTxt = state.intento > 1 ? ` · Intento ${state.intento}` : '';
+  el('app-header').querySelector('h1').textContent = `${state.studentName.split(' ')[0]} · Examen Final · ${state.group.label}${intentoTxt}`;
   el('timer-box').style.display = 'flex';
   el('progress-bar-wrap').style.display = 'block';
 
@@ -1144,7 +1161,7 @@ function beginExam() {
   state.examActive = true;
   updateTabBadge();
 
-  if (saved) {
+  if (reanudar) {
     // Recargar o reabrir la página cuenta como salida. Si el navegador alcanzó a
     // registrar la pestaña oculta al cerrar (saved.away), no se cuenta dos veces.
     if (saved.away) {
@@ -1192,7 +1209,8 @@ function showResults(result) {
   el('result-title').textContent = result.grade >= 3.0 ? '¡Examen aprobado!' : 'Examen no aprobado';
   const reasonTxt = result.reason === 'tiempo' ? ' · Enviado por tiempo agotado'
                   : result.reason === 'salidas' ? ' · Enviado por exceso de salidas' : '';
-  el('result-subtitle').textContent = `${state.studentName} · ${state.group.label} · Examen Final — Bases de datos en la nube${reasonTxt}`;
+  const intentoTxt = state.intento > 1 ? ` · Intento ${state.intento}` : '';
+  el('result-subtitle').textContent = `${state.studentName} · ${state.group.label} · Examen Final — Bases de datos en la nube${intentoTxt}${reasonTxt}`;
 
   const tabCls = state.tabSwitches === 0 ? 'green' : state.tabSwitches <= 2 ? 'orange' : 'red';
   const stats = [
