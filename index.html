@@ -107,6 +107,15 @@
       padding: .15rem .55rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); align-self: flex-start;
     }
     .tag.recuperacion { background: #fdf0e6; color: #a4520f; }
+    .tag.cerrado { background: #eceeed; color: #6b7472; }
+
+    /* ── examen cerrado ── */
+    .option.cerrada { cursor: default; background: #f7f9f8; border-style: dashed; border-color: var(--border); }
+    .option.cerrada:hover { border-color: var(--border); box-shadow: none; transform: none; }
+    .option.cerrada h2 { color: var(--muted); font-weight: 600; }
+    .option.cerrada p { color: #8d9794; }
+    .option.cerrada .icon { background: #eceeed; color: #9aa4a1; }
+    .option.cerrada .foot .go { color: var(--muted); font-weight: 500; }
 
     .empty { background: var(--card); border: 1px dashed var(--border); border-radius: var(--radius); padding: 1.5rem; color: var(--muted); text-align: center; }
 
@@ -139,6 +148,7 @@
 
   <footer>eNotes · Integración externa — 2026</footer>
 
+<script src="cierres.js"></script>
 <script>
 /* ════════════════════════════════════════════════════════
    CATÁLOGO — para agregar un examen, añádelo al semestre
@@ -203,6 +213,12 @@ const PROGRAMS = [
 const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/* Fechas de cierre: ver cierres.js */
+const cierres  = window.Cierres || { cerrado: () => false, fecha: () => null, legible: () => '' };
+const cerrado  = e => cierres.cerrado(e.href);
+const cierraEl = e => cierres.legible(cierres.fecha(e.href));
+const cuenta   = (lista, fn) => lista.filter(fn).length;
+
 function parseHash() {
   const [p, s] = location.hash.replace(/^#\/?/, '').split('/');
   const program = PROGRAMS.find(x => x.id === p) || null;
@@ -242,11 +258,11 @@ function render() {
       <p class="lead">Selecciona tu programa académico para ver los exámenes disponibles.</p>
       <div class="grid">
         ${PROGRAMS.map(p => {
-          const total = p.semesters.reduce((a, s) => a + s.exams.length, 0);
+          const abiertos = p.semesters.reduce((a, s) => a + cuenta(s.exams, e => !cerrado(e)), 0);
           return `<a class="option ${p.id}" href="#${p.id}">
             <span class="icon">${icon(p.icon)}</span>
             <h2>${esc(p.name)}</h2>
-            <div class="foot"><span>${plural(total, 'examen disponible', 'exámenes disponibles')}</span><span class="go">Continuar →</span></div>
+            <div class="foot"><span>${abiertos ? plural(abiertos, 'examen abierto', 'exámenes abiertos') : 'Sin exámenes abiertos'}</span><span class="go">Continuar →</span></div>
           </a>`;
         }).join('')}
       </div>`;
@@ -256,13 +272,19 @@ function render() {
       <h1>${esc(program.name)}</h1>
       <p class="lead">¿En qué semestre estás?</p>
       <div class="grid">
-        ${program.semesters.map(s => `
-          <a class="option" href="#${program.id}/${s.number}">
+        ${program.semesters.map(s => {
+          const abiertos = cuenta(s.exams, e => !cerrado(e));
+          const cerrados = s.exams.length - abiertos;
+          const resumen  = abiertos
+            ? plural(abiertos, 'examen abierto', 'exámenes abiertos') + (cerrados ? ` · ${cerrados} cerrado${cerrados > 1 ? 's' : ''}` : '')
+            : plural(cerrados, 'examen cerrado', 'exámenes cerrados');
+          return `<a class="option" href="#${program.id}/${s.number}">
             <span class="semester-num">${s.number}.º</span>
             <h2>Semestre ${s.number}</h2>
             <p>${s.exams.map(e => esc(e.title)).join(' · ')}</p>
-            <div class="foot"><span>${plural(s.exams.length, 'examen', 'exámenes')}</span><span class="go">Ver exámenes →</span></div>
-          </a>`).join('')}
+            <div class="foot"><span>${resumen}</span><span class="go">Ver exámenes →</span></div>
+          </a>`;
+        }).join('')}
       </div>`;
   } else {
     view.innerHTML = `
@@ -270,14 +292,25 @@ function render() {
       <h1>${semester.number}.º semestre</h1>
       <p class="lead">${esc(program.name)} · Selecciona el examen que vas a presentar.</p>
       ${semester.exams.length ? `<div class="grid">
-        ${semester.exams.map(e => `
-          <a class="option" href="${e.href}">
-            <span class="icon">${icon(e.icon)}</span>
-            <span class="tag ${/recuperaci/i.test(e.tag) ? 'recuperacion' : ''}">${esc(e.tag)}</span>
-            <h2>${esc(e.title)}</h2>
-            <p>${esc(e.desc)}</p>
-            <div class="foot"><span></span><span class="go">Ingresar →</span></div>
-          </a>`).join('')}
+        ${semester.exams.map(e => {
+          const fecha = cierraEl(e);
+          if (cerrado(e)) return `
+            <div class="option cerrada" aria-disabled="true">
+              <span class="icon">${icon(e.icon)}</span>
+              <span class="tag cerrado">Cerrado</span>
+              <h2>${esc(e.title)}</h2>
+              <p>${esc(e.desc)}</p>
+              <div class="foot"><span>Cerró el ${esc(fecha)}</span><span class="go">No disponible</span></div>
+            </div>`;
+          return `
+            <a class="option" href="${e.href}">
+              <span class="icon">${icon(e.icon)}</span>
+              <span class="tag ${/recuperaci/i.test(e.tag) ? 'recuperacion' : ''}">${esc(e.tag)}</span>
+              <h2>${esc(e.title)}</h2>
+              <p>${esc(e.desc)}</p>
+              <div class="foot"><span>${fecha ? `Abierto hasta el ${esc(fecha)}` : ''}</span><span class="go">Ingresar →</span></div>
+            </a>`;
+        }).join('')}
       </div>` : `<div class="empty">No hay exámenes disponibles para este semestre.</div>`}`;
   }
 
