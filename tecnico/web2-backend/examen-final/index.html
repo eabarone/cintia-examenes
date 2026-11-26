@@ -555,7 +555,7 @@ const EXERCISES = [
       { id: "r2", text: "El servidor espera conexiones en un puerto y los clientes le hablan por red." },
       { id: "r3", text: "Te entregan la base de datos funcionando y tú solo usas su dirección." },
       { id: "r4", text: "La cadena con usuario, contraseña, host, puerto y nombre de la base." },
-      { id: "r5", text: "Donde se guarda esa cadena; va en .gitignore y no se comparte." },
+      { id: "r5", text: "Donde se guarda la cadena de conexión; va en .gitignore y no se comparte." },
       { id: "r6", text: "No administras servidores: la base se suspende sola cuando nadie la usa." },
     ],
     answer: { l0: "r0", l1: "r1", l2: "r2", l3: "r3", l4: "r4", l5: "r5", l6: "r6" }
@@ -665,7 +665,7 @@ const EXERCISES = [
       { before: "postgresql://usuario:clave@xxxx.proxy.rlwy.net:", after: "/railway",
         hint: "puerto por defecto de PostgreSQL", answers: ["5432"] },
       { before: "...neon.tech/neondb?sslmode=", after: "",
-        hint: "valor que exige una conexión cifrada", answers: ["require"] },
+        hint: "valor que exige una conexión cifrada", answers: ["require", "verify-full"] },
       { before: "DATABASE_", after: "=postgresql://usuario:clave@host/neondb",
         hint: "cómo se llama la variable en el archivo .env", answers: ["URL"] },
       { before: "correo VARCHAR(150) NOT NULL ", after: ",",
